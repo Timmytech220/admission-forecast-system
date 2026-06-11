@@ -1,7 +1,6 @@
 import streamlit as st
 import joblib
 import pandas as pd
-import plotly.express as px
 
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(page_title="Admission Forecast System", page_icon="🎓", layout="centered")
@@ -22,13 +21,18 @@ st.markdown("---")
 if "history" not in st.session_state:
     st.session_state.history = []
 
+# ---------------- INPUTS WITH VALIDATION ----------------
 col1, col2 = st.columns(2)
 with col1:
     name = st.text_input("Student Name")
-    jamb = st.slider("JAMB Score", 100, 400, 250)
+    jamb = st.slider("JAMB Score", 100, 400, 250, help="Enter score between 100-400")
 with col2:
-    waec = st.slider("WAEC Score", 0, 100, 50)
-    interview = st.slider("Interview Score", 0, 100, 50)
+    waec = st.slider("WAEC Score", 0, 100, 50, help="Enter points between 0-100")
+    interview = st.slider("Interview Score", 0, 100, 50, help="Enter score between 0-100")
+
+# Logic guard/warning
+if jamb < 180:
+    st.warning("Note: JAMB scores below 180 may significantly reduce admission chances.")
 
 # ---------------- PREDICTION ----------------
 if st.button("Predict Admission", type="primary"):
@@ -56,9 +60,24 @@ if st.button("Predict Admission", type="primary"):
     else:
         st.error("❌ RESULT: NOT ADMITTED")
 
+# ---------------- ABOUT SECTION ----------------
+with st.expander("ℹ️ About this Project"):
+    st.write("""
+    This Admission Forecast System uses machine learning to estimate admission 
+    probability based on historical data. 
+    
+    **How it works:**
+    - **JAMB Score:** Represents your primary aptitude score.
+    - **WAEC Points:** Represents your O'Level performance.
+    - **Interview Score:** Represents your performance during the screening stage.
+    
+    *Disclaimer: This tool provides an estimate for educational purposes only 
+    and does not guarantee admission.*
+    """)
+
 # ---------------- SIDEBAR ----------------
 with st.sidebar:
     st.header("Recent Predictions")
     for item in reversed(st.session_state.history[-5:]):
         st.write(f"**{item['name']}** → {item['prob']:.2%}")
-        
+    
