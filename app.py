@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 
 # 1. SETUP: Wide layout
-st.set_page_config(page_title="Admission Analytics Console", page_icon="🎓", layout="wide")
+st.set_page_config(page_title="Admission forecast system ", page_icon="🎓", layout="wide")
 
 # 2. MODEL LOADING
 @st.cache_resource
@@ -26,7 +26,7 @@ st.markdown("---")
 
 col_left, col_right = st.columns([1, 2])
 
-# LEFT: INPUTS (Control Panel)
+# LEFT: INPUTS
 with col_left:
     st.subheader("Student Profile")
     name = st.text_input("Full Name", placeholder="Enter student name...")
@@ -35,15 +35,14 @@ with col_left:
     interview = st.slider("Interview Score", 0, 100, 50)
     predict_btn = st.button("🚀 Analyze Now", type="primary", use_container_width=True)
 
-# RIGHT: RESULTS (Dashboard Display)
+# RIGHT: RESULTS
 with col_right:
     if predict_btn:
-        # Prediction Logic
         input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [waec], "interview_score": [interview]})
         prob = float(pipeline.predict(input_data)[0])
         st.session_state.history.append({"name": name or "Anonymous", "prob": prob})
         
-        # Dashboard Card Layout
+        # KPI Cards
         kpi1, kpi2 = st.columns(2)
         kpi1.metric("Admission Probability", f"{prob:.1%}")
         
@@ -53,11 +52,24 @@ with col_right:
         
         st.markdown("---")
         
-        # Chart
+        # SUGGESTION 1: DATA INSIGHTS
+        st.subheader("💡 Model Insight")
+        if prob >= 0.7:
+            st.info("The model indicates a high probability of admission. Your composite score is strong.")
+        elif prob >= 0.4:
+            st.info("Borderline result. Improving your JAMB/WAEC scores will significantly boost your chances.")
+        else:
+            st.info("Low probability. We recommend reviewing the admission criteria or improving O'Level performance.")
+        
+        # SUGGESTION 2: DOWNLOAD REPORT
+        report_text = f"Admission Report for {name or 'Anonymous'}\nProbability: {prob:.2%}\nJAMB: {jamb}, WAEC: {waec}, Interview: {interview}"
+        st.download_button(label="📥 Download Report", data=report_text, file_name="admission_report.txt", mime="text/plain")
+        
+        # Performance Chart
         st.subheader("Performance Trends")
         chart_data = pd.DataFrame({"Cat": ["JAMB", "WAEC", "INT"], "Val": [jamb/4, waec, interview]})
         fig = px.bar(chart_data, x="Cat", y="Val", color="Val", color_continuous_scale="RdYlGn")
         fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
         st.plotly_chart(fig, use_container_width=True)
     else:
-        st.info("👈 Enter details on the left and click 'Analyze Now' to generate the dashboard report.")
+        st.info("👈 Enter details on the left and click 'Analyze Now' to generate your report.")
