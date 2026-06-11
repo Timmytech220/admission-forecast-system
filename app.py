@@ -6,10 +6,10 @@ import plotly.express as px
 # 1. Page Config
 st.set_page_config(page_title="Admission Forecast", page_icon="🎓", layout="centered")
 
-# 2. Load Model (IMPORTANT: file must be in GitHub repo)
+# 2. Load Model (MATCH YOUR REAL FILE NAME IN GITHUB)
 @st.cache_resource
 def load_my_model():
-    return joblib.load("admission_model_v2.pkl")
+    return joblib.load("admission_model.pkl")  # ✅ FIXED HERE
 
 model = load_my_model()
 
@@ -74,7 +74,7 @@ if st.button("🚀 Forecast Admission Probability", type="primary"):
     else:
         st.error("### Result: Review Required")
 
-    # --- Plotly Chart (REPLACES MATPLOTLIB) ---
+    # --- Plotly Chart ---
     st.subheader("🔍 Decision Drivers")
 
     features = ['Year', 'JAMB', 'WAEC', 'Interview', 'Agg', 'Cons']
