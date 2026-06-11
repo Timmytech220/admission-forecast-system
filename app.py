@@ -1,83 +1,65 @@
 import streamlit as st
 import joblib
 import pandas as pd
+import plotly.express as px
 
 # ---------------- PAGE CONFIG ----------------
-st.set_page_config(page_title="Admission Forecast System", page_icon="🎓", layout="centered")
+st.set_page_config(page_title="TIMMYTECH ADMISSION FORECAST SYSTEM DASHBOARD", page_icon="🎓", layout="wide")
 
-# ---------------- PIPELINE LOADING ----------------
+# ---------------- MODEL ----------------
 @st.cache_resource
 def load_pipeline():
-    # Loading the "Smart" engine we built
     return joblib.load("final_pipeline.pkl")
 
 pipeline = load_pipeline()
 
-# ---------------- UI ----------------
-st.title("🎓 Admission Forecast System")
-st.markdown("### AI-powered admission prediction dashboard")
+# ---------------- DASHBOARD HEADER ----------------
+st.title("🎓 Admission Forecast Dashboard")
 st.markdown("---")
 
 if "history" not in st.session_state:
     st.session_state.history = []
 
-# ---------------- INPUTS WITH VALIDATION ----------------
-col1, col2 = st.columns(2)
-with col1:
-    name = st.text_input("Student Name")
-    jamb = st.slider("JAMB Score", 100, 400, 250, help="Enter score between 100-400")
-with col2:
-    waec = st.slider("WAEC Score", 0, 100, 50, help="Enter points between 0-100")
-    interview = st.slider("Interview Score", 0, 100, 50, help="Enter score between 0-100")
+# ---------------- LAYOUT: INPUTS ON LEFT ----------------
+col_left, col_right = st.columns([1, 2])
 
-# Logic guard/warning
-if jamb < 180:
-    st.warning("Note: JAMB scores below 180 may significantly reduce admission chances.")
+with col_left:
+    st.subheader("Student Profile")
+    name = st.text_input("Full Name")
+    jamb = st.slider("JAMB Score", 100, 400, 250)
+    waec = st.slider("WAEC Score", 0, 100, 50)
+    interview = st.slider("Interview Score", 0, 100, 50)
+    predict_btn = st.button("🚀 Run Forecast", type="primary")
 
-# ---------------- PREDICTION ----------------
-if st.button("Predict Admission", type="primary"):
-    # The pipeline ONLY expects these 3 specific columns
-    input_data = pd.DataFrame({
-        "jamb_score": [jamb],
-        "waec_points": [waec],
-        "interview_score": [interview]
-    })
-
-    # The pipeline handles all scaling and math internally
-    prediction = pipeline.predict(input_data)
-    prob = float(prediction[0])
-    prob = max(0, min(1, prob))
-
-    st.session_state.history.append({"name": name or "Anonymous", "prob": prob})
-
-    st.metric("Admission Probability", f"{prob:.2%}")
-
-    if prob >= 0.7:
-        st.success("🎉 RESULT: ADMITTED")
-        st.balloons()
-    elif prob >= 0.4:
-        st.warning("⚠ RESULT: BORDERLINE")
+# ---------------- LAYOUT: RESULTS ON RIGHT ----------------
+with col_right:
+    if predict_btn:
+        input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [waec], "interview_score": [interview]})
+        prob = float(pipeline.predict(input_data)[0])
+        prob = max(0, min(1, prob))
+        
+        st.session_state.history.append({"name": name or "Anonymous", "prob": prob})
+        
+        # Display Metric
+        st.metric("Admission Probability", f"{prob:.2%}")
+        
+        # Status Color-coding
+        if prob >= 0.7:
+            st.success("STATUS: QUALIFIED")
+        elif prob >= 0.4:
+            st.warning("STATUS: BORDERLINE")
+        else:
+            st.error("STATUS: NOT QUALIFIED")
+            
+        # Chart
+        chart_data = pd.DataFrame({"Category": ["JAMB", "WAEC", "Interview"], "Score": [jamb/4, waec, interview]})
+        fig = px.bar(chart_data, x="Category", y="Score", color="Score", color_continuous_scale="Viridis")
+        st.plotly_chart(fig, use_container_width=True)
     else:
-        st.error("❌ RESULT: NOT ADMITTED")
+        st.info("👈 Fill in the student details and click Run Forecast to view the dashboard.")
 
-# ---------------- ABOUT SECTION ----------------
+# ---------------- FOOTER ----------------
+st.markdown("---")
 with st.expander("ℹ️ About this Project"):
-    st.write("""
-    This Admission Forecast System uses machine learning to estimate admission 
-    probability based on historical data. 
-    
-    **How it works:**
-    - **JAMB Score:** Represents your primary aptitude score.
-    - **WAEC Points:** Represents your O'Level performance.
-    - **Interview Score:** Represents your performance during the screening stage.
-    
-    *Disclaimer: This tool provides an estimate for educational purposes only 
-    and does not guarantee admission.*
-    """)
-
-# ---------------- SIDEBAR ----------------
-with st.sidebar:
-    st.header("Recent Predictions")
-    for item in reversed(st.session_state.history[-5:]):
-        st.write(f"**{item['name']}** → {item['prob']:.2%}")
+    st.write("Professional Admission Forecast System. Powered by Machine Learning.")
     
