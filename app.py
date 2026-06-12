@@ -40,8 +40,32 @@ with st.sidebar:
 # --- 4. PAGE LOGIC ---
 
 if page == "Dashboard":
-    st.title(" Welcome to Timmytech Admission Forecast System")
+    st.title("Welcome to Timmytech Admission Forecast System")
     st.image("https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2000", use_column_width=True)
+    
+    # --- ANALYTICS SUMMARY ---
+    if len(st.session_state.history) > 0:
+        df_hist = pd.DataFrame(st.session_state.history)
+        
+        st.subheader("System Analytics Overview")
+        col1, col2, col3 = st.columns(3)
+        
+        # 1. Total Applicants
+        col1.metric("Total Applicants", len(df_hist))
+        
+        # 2. Success Rate
+        qualified_count = len(df_hist[df_hist['status'] == "QUALIFIED"])
+        success_rate = (qualified_count / len(df_hist)) * 100
+        col2.metric("Success Rate", f"{success_rate:.1f}%")
+        
+        # 3. Average Probability
+        avg_prob = df_hist['prob'].mean() * 100
+        col3.metric("Avg. Admission Prob.", f"{avg_prob:.1f}%")
+        
+        st.markdown("---")
+    else:
+        st.info("Run your first forecast in the 'Admission Forecast' tab to see analytics here!")
+        
     st.markdown("### Intelligent predictive analytics for your academic journey.")
 
 elif page == "Admission Forecast":
@@ -89,7 +113,6 @@ elif page == "Export Reports":
     else:
         for i, student in enumerate(st.session_state.history):
             report_text = f"TIMMYTECH OFFICIAL ADMISSION REPORT\nName: {student['name']}\nDecision: {student['status']}\nProbability: {student['prob']:.1%}\nJAMB: {student['jamb']}\nWAEC: {student['waec']}\nInterview: {student['intv']}"
-            # THE FIX: Added a unique key for each button using the index 'i'
             st.download_button(
                 label=f"Download Report: {student['name']}", 
                 data=report_text, 
@@ -105,4 +128,3 @@ elif page == "Help & Support":
     st.write("📞 **WhatsApp/Call:** 09168090334")
     st.write("👤 **Facebook:** Ajayi oluwatimileyin Daniel")
     st.write("🎵 **TikTok:** Doctor Timmy")
-
