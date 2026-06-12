@@ -11,114 +11,83 @@ def check_password():
         st.session_state.password_correct = False
 
     if not st.session_state.password_correct:
-
+        # PINTEREST-STYLE UI CSS (CENTERED)
         st.markdown("""
-        <style>
-        /* ===== BACKGROUND ===== */
-        .stApp {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-        }
-
-        /* ===== CENTER LOGIN BOX ===== */
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .login-card {
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(15px);
-            padding: 30px;
-            border-radius: 20px;
-            width: 360px;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        /* ===== PROFILE IMAGE DOUBLE BORDER ===== */
-        .profile-img {
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 15px;
-            border: 4px solid #ffffff;
-            box-shadow: 0 0 0 6px #1e90ff;
-        }
-
-        /* ===== INPUT FIELDS ===== */
-        div[data-testid="stTextInput"] input {
-            background: rgba(255,255,255,0.15) !important;
-            border-radius: 10px !important;
-            border: 1px solid rgba(255,255,255,0.3) !important;
-            color: white !important;
-        }
-
-        label {
-            color: white !important;
-            font-weight: 500;
-        }
-
-        /* ===== LOGIN BUTTON ===== */
-        div.stButton > button {
-            width: 100%;
-            background: #1e90ff;
-            color: white;
-            font-weight: bold;
-            padding: 10px;
-            border-radius: 10px;
-            border: none;
-        }
-
-        div.stButton > button:hover {
-            background: #0066cc;
-        }
-
-        .small-text {
-            color: white;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-
-        </style>
-        """, unsafe_allow_html=True)
-
-        st.markdown('<div class="login-container">', unsafe_allow_html=True)
-        st.markdown('<div class="login-card">', unsafe_allow_html=True)
-
-        st.markdown("<h2 style='color:white;'>Admission Forecast System</h2>", unsafe_allow_html=True)
-
-        st.markdown("""
-        <img src="https://i.imgur.com/KyKv9T9.png" class="profile-img">
-        """, unsafe_allow_html=True)
-
-        username = st.text_input("Username", placeholder="Enter username")
-        password = st.text_input("Password", type="password", placeholder="Enter password")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            remember = st.checkbox("Remember Me")
-
-        with col2:
-            st.markdown("<div class='small-text'>Forgot Password?</div>", unsafe_allow_html=True)
-
+            <style>
+            /* Force full screen height and center everything */
+            .stApp { 
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .login-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                max-width: 400px;
+                padding: 20px;
+            }
+            .login-card { 
+                text-align: center; 
+                padding: 30px; 
+                border-radius: 20px; 
+                background: rgba(255, 255, 255, 0.95); 
+                box-shadow: 0px 10px 30px rgba(0,0,0,0.3);
+                width: 100%;
+                border: 1px solid #ddd;
+            }
+            .profile-img { 
+                border-radius: 50%; 
+                width: 120px; 
+                height: 120px; 
+                object-fit: cover; 
+                margin: 0 auto 20px auto; 
+                border: 4px solid #ffffff;
+                display: block;
+            }
+            /* Styling inputs to look like the screenshot */
+            div[data-testid="stTextInput"] {
+                margin-bottom: 15px;
+            }
+            div[data-testid="stTextInput"] > div > div > input {
+                border: 1px solid #ccc !important;
+                border-radius: 10px !important;
+                padding: 10px !important;
+            }
+            div.stButton > button { 
+                width: 100%; 
+                border-radius: 10px; 
+                background-color: #ffffff; 
+                color: #333; 
+                font-weight: bold; 
+                border: 1px solid #ccc;
+                margin-top: 10px;
+            }
+            </style>
+            """, unsafe_allow_html=True)
+        
+        # Wrapping in a container to force centering
+        st.markdown('<div class="login-container"><div class="login-card">', unsafe_allow_html=True)
+        st.markdown('<img src="https://i.imgur.com/KyKv9T9.png" class="profile-img">', unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: center; color: #333;'>LOGIN UI</h2>", unsafe_allow_html=True)
+        
+        user = st.text_input("USERNAME")
+        password = st.text_input("PASSWORD", type="password")
+        
         if st.button("LOGIN"):
-            if username == "Timmy" and password == "1234":
+            if user == "Timmy" and password == "1234":
                 st.session_state.password_correct = True
                 st.rerun()
             else:
                 st.error("Invalid credentials")
-
+        
         st.markdown('</div></div>', unsafe_allow_html=True)
-
         return False
-
     return True
-
+        
 # --- 2. PREMIUM THEME & SIDEBAR CSS ---
 st.set_page_config(page_title="Timmytech Admission Forecast")
 st.markdown("""
