@@ -11,21 +11,24 @@ def check_password():
     if not st.session_state.password_correct:
         st.markdown("""
             <style>
-            .stApp { background: linear-gradient(135deg, #1e3a8a, #3b82f6); }
+            .stApp { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); }
             .login-card { 
-                text-align: center; padding: 40px; border-radius: 20px; 
-                background-color: #ffffff; box-shadow: 0px 10px 30px rgba(0,0,0,0.3);
-                max-width: 400px; margin: 100px auto; border: 1px solid #ddd;
+                text-align: center; padding: 40px; border-radius: 25px; 
+                background: rgba(255, 255, 255, 0.95); box-shadow: 0px 10px 30px rgba(0,0,0,0.5);
+                max-width: 350px; margin: 80px auto;
             }
-            .profile-img { border-radius: 50%; width: 150px; height: 150px; object-fit: cover; margin-bottom: 20px; border: 4px solid #3b82f6; }
+            .profile-img { 
+                border-radius: 50%; width: 120px; height: 120px; 
+                object-fit: cover; margin-bottom: 15px; border: 4px solid #3b82f6; 
+            }
             div.stButton > button { width: 100%; border-radius: 50px; background-color: #1e3a8a; color: white; font-weight: bold; }
             </style>
             """, unsafe_allow_html=True)
         
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
         st.markdown('<img src="https://i.imgur.com/KyKv9T9.png" class="profile-img">', unsafe_allow_html=True)
-        st.title("Timmytech Console")
-        st.subheader("Admission Forecast System")
+        st.title("TIMMYTECH")
+        st.subheader("Login UI")
         user = st.text_input("Username")
         password = st.text_input("Password", type="password")
         if st.button("Login"):
@@ -33,26 +36,26 @@ def check_password():
                 st.session_state.password_correct = True
                 st.rerun()
             else:
-                st.error("Invalid username or password")
+                st.error("Invalid credentials")
         st.markdown('</div>', unsafe_allow_html=True)
         return False
     return True
 
-# --- 2. SIDEBAR & THEME CSS ---
+# --- 2. PREMIUM THEME & SIDEBAR CSS ---
 st.set_page_config(page_title="Timmytech Admission Forecast")
 st.markdown("""
     <style>
     section[data-testid="stSidebar"] { background-color: #1e3a8a !important; color: white !important; }
     section[data-testid="stSidebar"] * { color: white !important; }
-    /* Added spacing to sidebar items */
-    div[role="radiogroup"] > label { margin-bottom: 25px !important; display: block; }
-    div.stButton > button { width: 100%; border-radius: 8px; background-color: #3b82f6; color: white; font-weight: bold; }
+    div[role="radiogroup"] > label { margin-bottom: 30px !important; display: block; font-size: 1.1em; }
+    .help-img { border-radius: 50%; width: 180px; height: 180px; border: 5px solid #3b82f6; object-fit: cover; }
     .result-card { border: 1px solid #e0e0e0; padding: 20px; border-radius: 10px; background-color: #f9f9f9; }
     </style>
     """, unsafe_allow_html=True)
 
 # --- 3. EXECUTION ---
 if check_password():
+    # Load model & initialize state
     pipeline = joblib.load("final_pipeline.pkl")
     if "history" not in st.session_state: st.session_state.history = []
     if "last_result" not in st.session_state: st.session_state.last_result = None
@@ -61,11 +64,11 @@ if check_password():
         st.image("https://cdn-icons-png.flaticon.com/512/2942/2942813.png", width=80) 
         st.markdown("## Timmytech Console")
         page = st.radio("MAIN NAVIGATION", ["Dashboard", "Admission Forecast", "History Log", "Export Reports", "Help & Support"], index=0)
-        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        st.markdown("<br><br>", unsafe_allow_html=True)
         st.caption("Status: Online")
         st.write("Developed by: **Ajayi Oluwatimileyin Daniel**")
 
-    # --- 5. PAGE LOGIC ---
+    # --- 4. PAGE LOGIC ---
     if page == "Dashboard":
         st.title("Welcome to Timmytech Admission Forecast System")
         st.image("https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2000", use_container_width=True)
@@ -76,7 +79,6 @@ if check_password():
             with c1: st.info(f"Total: **{len(df)}**")
             with c2: st.success(f"Success: **{(len(df[df['status'] == 'QUALIFIED']) / len(df)) * 100:.1f}%**")
             with c3: st.warning(f"Avg Prob: **{df['prob'].mean() * 100:.1f}%**")
-        st.markdown("### Intelligent predictive analytics for your academic journey.")
 
     elif page == "Admission Forecast":
         st.title("Admission Forecast Portal")
@@ -121,12 +123,19 @@ if check_password():
             st.download_button(label=f"Download: {s['name']}", data=txt, file_name=f"{s['name']}_report.txt", key=f"dl_{i}_{s['name']}")
 
     elif page == "Help & Support":
-        st.title("💬 Help & Support")
-        st.image("https://i.imgur.com/7M49Vnz.jpeg", width=250)
-        st.write("Developed by **Ajayi Oluwatimileyin Daniel**.")
+        st.title("💬 Help & Support Center")
+        c1, c2 = st.columns([1, 2])
+        with c1:
+            st.markdown('<img src="https://i.imgur.com/7M49Vnz.jpeg" class="help-img">', unsafe_allow_html=True)
+        with c2:
+            st.subheader("Developer Info")
+            st.write("Developed by: **Ajayi Oluwatimileyin Daniel**")
+            st.write("System designed to provide predictive admission analytics.")
+        
         st.markdown("---")
-        st.subheader("Get in touch")
+        st.subheader("Contact & Socials")
         st.write("📞 **WhatsApp/Call:** 09168090334")
+        st.write("📧 **Email:** oluwatimileyindaniel4@gmail.com")
         st.write("📱 **Facebook:** facebook.com/Timmytech")
         st.write("🎵 **TikTok:** tiktok.com/@Timmytech")
         
