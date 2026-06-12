@@ -5,73 +5,72 @@ import joblib
 
 import streamlit as st
 
-import streamlit as st
-import pandas as pd
-import plotly.express as px
-import joblib
-
-# --- 1. AUTHENTICATION ---
+# --- AUTHENTICATION ---
 def check_password():
     if "password_correct" not in st.session_state:
         st.session_state.password_correct = False
 
     if not st.session_state.password_correct:
-        # PURE CSS FOR A PROFESSIONAL, CENTERED CARD
+        # PROFESSIONAL CENTERED LOGIN CSS
         st.markdown("""
             <style>
-            [data-testid="stAppViewContainer"] {
-                background-color: #f0f2f6;
-            }
-            .login-wrapper {
+            /* Remove default background and set container to center */
+            .main {
                 display: flex;
-                justify-content: center;
                 align-items: center;
+                justify-content: center;
                 min-height: 80vh;
             }
-            .login-card {
-                background: white;
-                padding: 40px;
-                border-radius: 20px;
-                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            .login-card { 
+                padding: 40px; 
+                border-radius: 20px; 
+                border: 2px solid #e0e0e0;
+                background-color: #ffffff;
+                box-shadow: 0px 8px 24px rgba(0,0,0,0.1);
                 width: 100%;
-                max-width: 380px;
+                max-width: 400px;
                 text-align: center;
-                border: 1px solid #e1e4e8;
+                margin: auto;
             }
-            .profile-img {
-                width: 120px;
-                height: 120px;
-                border-radius: 50%;
-                object-fit: cover;
-                border: 4px solid #3b82f6;
-                margin-bottom: 20px;
+            .profile-img { 
+                border-radius: 50%; 
+                width: 120px; 
+                height: 120px; 
+                object-fit: cover; 
+                margin-bottom: 20px; 
+                border: 3px solid #3b82f6;
             }
-            .title {
-                font-size: 20px;
-                font-weight: 600;
-                color: #1f2937;
-                margin-bottom: 25px;
+            .title-text {
+                font-size: 24px;
+                font-weight: bold;
+                color: #333;
+                margin-bottom: 30px;
             }
-            div[data-testid="stTextInput"] input {
-                border-radius: 10px !important;
-                border: 1px solid #d1d5db !important;
+            div[data-testid="stTextInput"] > div > div > input {
+                border: 1px solid #ccc !important;
+                border-radius: 8px !important;
             }
-            div.stButton > button {
-                width: 100%;
-                background-color: #3b82f6;
-                color: white;
+            div.stButton {
+                display: flex;
+                justify-content: center;
+                margin-top: 20px;
+            }
+            div.stButton > button { 
+                width: 100%; 
+                border-radius: 8px; 
+                background-color: #3b82f6; 
+                color: white; 
+                font-weight: bold; 
                 border: none;
-                border-radius: 10px;
                 padding: 10px;
-                font-weight: 600;
-                margin-top: 10px;
             }
             </style>
             """, unsafe_allow_html=True)
-
-        st.markdown('<div class="login-wrapper"><div class="login-card">', unsafe_allow_html=True)
+        
+        # Centered Layout
+        st.markdown('<div class="login-card">', unsafe_allow_html=True)
         st.markdown('<img src="https://i.imgur.com/KyKv9T9.png" class="profile-img">', unsafe_allow_html=True)
-        st.markdown('<div class="title">Admission Forecast System</div>', unsafe_allow_html=True)
+        st.markdown('<div class="title-text">Admission Forecast System</div>', unsafe_allow_html=True)
         
         user = st.text_input("Username")
         password = st.text_input("Password", type="password")
@@ -82,15 +81,14 @@ def check_password():
                 st.rerun()
             else:
                 st.error("Invalid credentials")
-        
-        st.markdown('</div></div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
         return False
     return True
 
-# --- REMAINDER OF YOUR CODE STARTS HERE ---
+# --- MAIN APP ---
 if check_password():
-    # Load your pipeline, sidebar, and pages...
-                    
+    st.write("Welcome to the system!")
+    
            
         
 # --- 2. PREMIUM THEME & SIDEBAR CSS ---
