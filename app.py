@@ -33,8 +33,7 @@ with st.sidebar:
 
 if page == "Dashboard":
     st.title("Welcome to Timmytech Admission Forecast System")
-    # Added professional dashboard header image
-    st.image("https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2000", use_column_width=True)
+    st.image("https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2000", use_container_width=True)
     
     if len(st.session_state.history) > 0:
         df = pd.DataFrame(st.session_state.history)
@@ -68,6 +67,7 @@ elif page == "Admission Forecast":
                 st.session_state.history.append(st.session_state.last_result)
             
     with col2:
+        # Check for existence of result before rendering to avoid TypeError
         if st.session_state.last_result:
             res = st.session_state.last_result
             st.markdown('<div class="result-card">', unsafe_allow_html=True)
@@ -79,7 +79,7 @@ elif page == "Admission Forecast":
             df_plot = pd.DataFrame({"Metric": ["JAMB", "WAEC", "INT"], "Score": [res['jamb']/4, res['waec'], res['intv']]})
             fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
             fig.add_hline(y=50, line_dash="dash", line_color="red", annotation_text="Threshold")
-            st.plotly_chart(fig, use_column_width=True)
+            st.plotly_chart(fig, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
 
 elif page == "History Log":
@@ -91,11 +91,17 @@ elif page == "History Log":
 
 elif page == "Export Reports":
     st.title("🖨️ Export Official Reports")
-    # Professional banner for export page
     st.image("https://img.freepik.com/free-vector/data-report-concept-illustration_114360-557.jpg", width=200)
+    
+    # FIXED: Added a unique string to the key to prevent DuplicateElementId error
     for i, s in enumerate(st.session_state.history):
         txt = f"TIMMYTECH REPORT\nName: {s['name']}\nDecision: {s['status']}\nProb: {s['prob']:.1%}"
-        st.download_button(f"Download: {s['name']}", txt, f"{s['name']}_report.txt", key=f"dl_{i}")
+        st.download_button(
+            label=f"Download: {s['name']}", 
+            data=txt, 
+            file_name=f"{s['name']}_report.txt", 
+            key=f"dl_{i}_{s['name']}" 
+        )
 
 elif page == "Help & Support":
     st.title("💬 Help & Support")
@@ -105,3 +111,4 @@ elif page == "Help & Support":
     st.markdown("---")
     st.write("📞 **WhatsApp/Call:** 09168090334")
     st.write("👤 **Facebook:** Ajayi oluwatimileyin Daniel")
+    
