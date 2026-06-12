@@ -11,68 +11,71 @@ def check_password():
         st.session_state.password_correct = False
 
     if not st.session_state.password_correct:
-        # PINTEREST-STYLE UI CSS (CENTERED)
+        # PINTEREST-STYLE UI CSS (CENTERED EVERYTHING)
         st.markdown("""
             <style>
-            /* Force full screen height and center everything */
             .stApp { 
                 background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-                display: flex;
-                align-items: center;
-                justify-content: center;
             }
             .login-container {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                width: 100%;
-                max-width: 400px;
-                padding: 20px;
+                min-height: 80vh;
             }
             .login-card { 
                 text-align: center; 
-                padding: 30px; 
-                border-radius: 20px; 
-                background: rgba(255, 255, 255, 0.95); 
-                box-shadow: 0px 10px 30px rgba(0,0,0,0.3);
+                padding: 40px; 
+                border-radius: 25px; 
+                background: rgba(255, 255, 255, 1); 
+                box-shadow: 0px 15px 40px rgba(0,0,0,0.3);
                 width: 100%;
-                border: 1px solid #ddd;
+                max-width: 450px;
+                border: 2px solid #e0e0e0;
             }
             .profile-img { 
                 border-radius: 50%; 
-                width: 120px; 
-                height: 120px; 
+                width: 150px; 
+                height: 150px; 
                 object-fit: cover; 
                 margin: 0 auto 20px auto; 
-                border: 4px solid #ffffff;
+                border: 6px solid #4facfe;
                 display: block;
             }
-            /* Styling inputs to look like the screenshot */
-            div[data-testid="stTextInput"] {
-                margin-bottom: 15px;
-            }
+            h2 { color: #333; margin-bottom: 30px !important; }
+            
+            /* Enhanced Input fields */
+            div[data-testid="stTextInput"] { margin-bottom: 20px; }
             div[data-testid="stTextInput"] > div > div > input {
-                border: 1px solid #ccc !important;
-                border-radius: 10px !important;
-                padding: 10px !important;
+                border: 2px solid #ddd !important;
+                border-radius: 12px !important;
+                padding: 15px !important;
+                font-size: 16px !important;
+            }
+            
+            /* NEW: Centering the button container */
+            div.stButton {
+                display: flex;
+                justify-content: center;
             }
             div.stButton > button { 
                 width: 100%; 
-                border-radius: 10px; 
-                background-color: #ffffff; 
-                color: #333; 
+                padding: 12px;
+                border-radius: 12px; 
+                background-color: #4facfe; 
+                color: white; 
                 font-weight: bold; 
-                border: 1px solid #ccc;
-                margin-top: 10px;
+                font-size: 18px;
+                border: none;
+                margin-top: 15px;
             }
             </style>
             """, unsafe_allow_html=True)
         
-        # Wrapping in a container to force centering
         st.markdown('<div class="login-container"><div class="login-card">', unsafe_allow_html=True)
         st.markdown('<img src="https://i.imgur.com/KyKv9T9.png" class="profile-img">', unsafe_allow_html=True)
-        st.markdown("<h2 style='text-align: center; color: #333;'>LOGIN UI</h2>", unsafe_allow_html=True)
+        st.markdown("<h2>Admission Forecast System</h2>", unsafe_allow_html=True)
         
         user = st.text_input("USERNAME")
         password = st.text_input("PASSWORD", type="password")
@@ -87,6 +90,8 @@ def check_password():
         st.markdown('</div></div>', unsafe_allow_html=True)
         return False
     return True
+                    
+
         
 # --- 2. PREMIUM THEME & SIDEBAR CSS ---
 st.set_page_config(page_title="Timmytech Admission Forecast")
