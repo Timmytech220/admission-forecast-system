@@ -11,29 +11,23 @@ def check_password():
     if not st.session_state.password_correct:
         st.markdown("""
             <style>
+            .stApp { background: linear-gradient(135deg, #1e3a8a, #3b82f6); }
             .login-card { 
-                text-align: center; 
-                padding: 40px; 
-                border-radius: 20px; 
-                background-color: #ffffff; 
-                box-shadow: 0px 10px 20px rgba(0,0,0,0.15);
-                max-width: 400px; 
-                margin: auto;
-                border: 1px solid #e1e4e8;
+                text-align: center; padding: 40px; border-radius: 20px; 
+                background-color: #ffffff; box-shadow: 0px 10px 30px rgba(0,0,0,0.3);
+                max-width: 400px; margin: 100px auto; border: 1px solid #ddd;
             }
+            .profile-img { border-radius: 50%; width: 150px; height: 150px; object-fit: cover; margin-bottom: 20px; border: 4px solid #3b82f6; }
+            div.stButton > button { width: 100%; border-radius: 50px; background-color: #1e3a8a; color: white; font-weight: bold; }
             </style>
             """, unsafe_allow_html=True)
         
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
-        # Login Page Image (Standing)
-        st.image("https://i.imgur.com/KyKv9T9.png", width=180)
+        st.markdown('<img src="https://i.imgur.com/KyKv9T9.png" class="profile-img">', unsafe_allow_html=True)
         st.title("Timmytech Console")
         st.subheader("Admission Forecast System")
-        st.write("Secure Access Portal")
-        
         user = st.text_input("Username")
         password = st.text_input("Password", type="password")
-        
         if st.button("Login"):
             if user == "Timmy" and password == "1234":
                 st.session_state.password_correct = True
@@ -44,14 +38,16 @@ def check_password():
         return False
     return True
 
-# --- 2. PREMIUM THEME & BLUE SIDEBAR CSS ---
+# --- 2. SIDEBAR & THEME CSS ---
 st.set_page_config(page_title="Timmytech Admission Forecast")
 st.markdown("""
     <style>
-    section[data-testid="stSidebar"] { background-color: #1e3a8a !important; color: white !important; padding-top: 40px; }
+    section[data-testid="stSidebar"] { background-color: #1e3a8a !important; color: white !important; }
     section[data-testid="stSidebar"] * { color: white !important; }
-    div.stButton > button { width: 100%; border-radius: 8px; background-color: #3b82f6; color: white; font-weight: bold; height: 3.5em; }
-    .result-card { border: 1px solid #e0e0e0; padding: 20px; border-radius: 10px; background-color: rgba(249, 249, 249, 0.1); box-shadow: 2px 2px 10px rgba(0,0,0,0.1); }
+    /* Added spacing to sidebar items */
+    div[role="radiogroup"] > label { margin-bottom: 25px !important; display: block; }
+    div.stButton > button { width: 100%; border-radius: 8px; background-color: #3b82f6; color: white; font-weight: bold; }
+    .result-card { border: 1px solid #e0e0e0; padding: 20px; border-radius: 10px; background-color: #f9f9f9; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -65,7 +61,7 @@ if check_password():
         st.image("https://cdn-icons-png.flaticon.com/512/2942/2942813.png", width=80) 
         st.markdown("## Timmytech Console")
         page = st.radio("MAIN NAVIGATION", ["Dashboard", "Admission Forecast", "History Log", "Export Reports", "Help & Support"], index=0)
-        st.markdown("<br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
         st.caption("Status: Online")
         st.write("Developed by: **Ajayi Oluwatimileyin Daniel**")
 
@@ -77,11 +73,9 @@ if check_password():
             df = pd.DataFrame(st.session_state.history)
             st.subheader("System Analytics Overview")
             c1, c2, c3 = st.columns(3)
-            with c1: st.info(f"Total Applicants: **{len(df)}**")
-            with c2: st.success(f"Success Rate: **{(len(df[df['status'] == 'QUALIFIED']) / len(df)) * 100:.1f}%**")
-            with c3: st.warning(f"Avg. Probability: **{df['prob'].mean() * 100:.1f}%**")
-        else:
-            st.info("Run your first forecast in the 'Admission Forecast' tab to see analytics here!")
+            with c1: st.info(f"Total: **{len(df)}**")
+            with c2: st.success(f"Success: **{(len(df[df['status'] == 'QUALIFIED']) / len(df)) * 100:.1f}%**")
+            with c3: st.warning(f"Avg Prob: **{df['prob'].mean() * 100:.1f}%**")
         st.markdown("### Intelligent predictive analytics for your academic journey.")
 
     elif page == "Admission Forecast":
@@ -103,9 +97,8 @@ if check_password():
                     st.session_state.history.append(st.session_state.last_result)
                 if st.session_state.last_result:
                     res = st.session_state.last_result
-                    if res['status'] == "QUALIFIED": st.success(f"FINAL DECISION: {res['status']}")
-                    else: st.error(f"FINAL DECISION: {res['status']}")
-                    st.info(f"💡 **AI Suggestion:** Your score of {res['prob']:.1%} suggests focusing on { 'Interview' if res['intv'] < 60 else 'academic core subjects' } to improve future probability.")
+                    st.success(f"FINAL DECISION: {res['status']}")
+                    st.info(f"💡 **AI Suggestion:** Your score of {res['prob']:.1%} suggests focusing on { 'Interview' if res['intv'] < 60 else 'academic core subjects' }.")
         with col2:
             if st.session_state.last_result:
                 res = st.session_state.last_result
@@ -113,7 +106,6 @@ if check_password():
                 st.subheader("Visual Analysis")
                 df_plot = pd.DataFrame({"Metric": ["JAMB", "WAEC", "INT"], "Score": [res['jamb']/4, res['waec'], res['intv']]})
                 fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
-                fig.add_hline(y=50, line_dash="dash", line_color="red", annotation_text="Threshold")
                 st.plotly_chart(fig, use_container_width=True)
                 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -130,9 +122,11 @@ if check_password():
 
     elif page == "Help & Support":
         st.title("💬 Help & Support")
-        # Help Page Image (With Phone)
         st.image("https://i.imgur.com/7M49Vnz.jpeg", width=250)
         st.write("Developed by **Ajayi Oluwatimileyin Daniel**.")
         st.markdown("---")
+        st.subheader("Get in touch")
         st.write("📞 **WhatsApp/Call:** 09168090334")
+        st.write("📱 **Facebook:** facebook.com/Timmytech")
+        st.write("🎵 **TikTok:** tiktok.com/@Timmytech")
         
