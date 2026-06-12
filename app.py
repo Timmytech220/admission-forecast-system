@@ -33,6 +33,9 @@ with st.sidebar:
 
 if page == "Dashboard":
     st.title("Welcome to Timmytech Admission Forecast System")
+    # Added professional dashboard header image
+    st.image("https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2000", use_column_width=True)
+    
     if len(st.session_state.history) > 0:
         df = pd.DataFrame(st.session_state.history)
         st.subheader("System Analytics Overview")
@@ -42,6 +45,7 @@ if page == "Dashboard":
         c3.metric("Avg. Probability", f"{df['prob'].mean() * 100:.1f}%")
     else:
         st.info("Run your first forecast in the 'Admission Forecast' tab to see analytics here!")
+    st.markdown("### Intelligent predictive analytics for your academic journey.")
 
 elif page == "Admission Forecast":
     st.title(" Admission Forecast Portal")
@@ -75,20 +79,29 @@ elif page == "Admission Forecast":
             df_plot = pd.DataFrame({"Metric": ["JAMB", "WAEC", "INT"], "Score": [res['jamb']/4, res['waec'], res['intv']]})
             fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
             fig.add_hline(y=50, line_dash="dash", line_color="red", annotation_text="Threshold")
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_column_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
 
 elif page == "History Log":
     st.title("📋 Prediction History")
-    if st.session_state.history: st.dataframe(pd.DataFrame(st.session_state.history), use_container_width=True)
-    else: st.write("No records yet.")
+    if st.session_state.history: 
+        st.dataframe(pd.DataFrame(st.session_state.history), use_container_width=True)
+    else: 
+        st.write("No records yet.")
 
 elif page == "Export Reports":
     st.title("🖨️ Export Official Reports")
+    # Professional banner for export page
+    st.image("https://img.freepik.com/free-vector/data-report-concept-illustration_114360-557.jpg", width=200)
     for i, s in enumerate(st.session_state.history):
         txt = f"TIMMYTECH REPORT\nName: {s['name']}\nDecision: {s['status']}\nProb: {s['prob']:.1%}"
         st.download_button(f"Download: {s['name']}", txt, f"{s['name']}_report.txt", key=f"dl_{i}")
 
 elif page == "Help & Support":
     st.title("💬 Help & Support")
-    st.write("Timmytech System. Created by **Ajayi Oluwatimileyin Daniel**.")
+    st.image("https://cdn-icons-png.flaticon.com/512/3062/3062634.png", width=120)
+    st.write("Timmytech is a predictive AI system for admission management.")
+    st.write("Developed by **Ajayi Oluwatimileyin Daniel**.")
+    st.markdown("---")
+    st.write("📞 **WhatsApp/Call:** 09168090334")
+    st.write("👤 **Facebook:** Ajayi oluwatimileyin Daniel")
