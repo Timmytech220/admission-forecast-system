@@ -5,25 +5,46 @@ import joblib
 
 # --- 1. AUTHENTICATION ---
 def check_password():
-    """Returns True if the user had the correct password."""
     if "password_correct" not in st.session_state:
         st.session_state.password_correct = False
 
     if not st.session_state.password_correct:
-        st.title("🔐 Login Required")
+        st.markdown("""
+            <style>
+            .login-card { 
+                text-align: center; 
+                padding: 40px; 
+                border-radius: 20px; 
+                background-color: #ffffff; 
+                box-shadow: 0px 10px 20px rgba(0,0,0,0.15);
+                max-width: 400px; 
+                margin: auto;
+                border: 1px solid #e1e4e8;
+            }
+            </style>
+            """, unsafe_allow_html=True)
+        
+        st.markdown('<div class="login-card">', unsafe_allow_html=True)
+        # Login Page Image (Standing)
+        st.image("https://i.imgur.com/KyKv9T9.png", width=180)
+        st.title("Timmytech Console")
+        st.subheader("Admission Forecast System")
+        st.write("Secure Access Portal")
+        
         user = st.text_input("Username")
         password = st.text_input("Password", type="password")
+        
         if st.button("Login"):
             if user == "Timmy" and password == "1234":
                 st.session_state.password_correct = True
                 st.rerun()
             else:
                 st.error("Invalid username or password")
+        st.markdown('</div>', unsafe_allow_html=True)
         return False
     return True
 
 # --- 2. PREMIUM THEME & BLUE SIDEBAR CSS ---
-# Removed the forced white background to allow dark mode to work properly
 st.set_page_config(page_title="Timmytech Admission Forecast")
 st.markdown("""
     <style>
@@ -36,12 +57,10 @@ st.markdown("""
 
 # --- 3. EXECUTION ---
 if check_password():
-    # --- MODEL & SESSION ---
     pipeline = joblib.load("final_pipeline.pkl")
     if "history" not in st.session_state: st.session_state.history = []
     if "last_result" not in st.session_state: st.session_state.last_result = None
 
-    # --- 4. NAVIGATION ---
     with st.sidebar:
         st.image("https://cdn-icons-png.flaticon.com/512/2942/2942813.png", width=80) 
         st.markdown("## Timmytech Console")
@@ -54,7 +73,6 @@ if check_password():
     if page == "Dashboard":
         st.title("Welcome to Timmytech Admission Forecast System")
         st.image("https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2000", use_container_width=True)
-        
         if len(st.session_state.history) > 0:
             df = pd.DataFrame(st.session_state.history)
             st.subheader("System Analytics Overview")
@@ -75,23 +93,19 @@ if check_password():
             jamb = st.slider("JAMB Score", 100, 400, 250)
             waec = st.slider("WAEC Score", 0, 100, 50)
             intv = st.slider("Interview Score", 0, 100, 50)
-            
             if st.button("Run Forecast Now"):
-                if not name.strip():
-                    st.error("Please enter a student name.")
+                if not name.strip(): st.error("Please enter a student name.")
                 else:
                     input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [waec], "interview_score": [intv]})
                     prob = float(pipeline.predict(input_data)[0])
                     status = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
                     st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "waec": waec, "intv": intv}
                     st.session_state.history.append(st.session_state.last_result)
-                
                 if st.session_state.last_result:
                     res = st.session_state.last_result
                     if res['status'] == "QUALIFIED": st.success(f"FINAL DECISION: {res['status']}")
                     else: st.error(f"FINAL DECISION: {res['status']}")
                     st.info(f"💡 **AI Suggestion:** Your score of {res['prob']:.1%} suggests focusing on { 'Interview' if res['intv'] < 60 else 'academic core subjects' } to improve future probability.")
-
         with col2:
             if st.session_state.last_result:
                 res = st.session_state.last_result
@@ -105,10 +119,8 @@ if check_password():
 
     elif page == "History Log":
         st.title("📋 Prediction History")
-        if st.session_state.history: 
-            st.dataframe(pd.DataFrame(st.session_state.history), use_container_width=True)
-        else: 
-            st.write("No records yet.")
+        if st.session_state.history: st.dataframe(pd.DataFrame(st.session_state.history), use_container_width=True)
+        else: st.write("No records yet.")
 
     elif page == "Export Reports":
         st.title("🖨️ Export Official Reports")
@@ -118,7 +130,9 @@ if check_password():
 
     elif page == "Help & Support":
         st.title("💬 Help & Support")
+        # Help Page Image (With Phone)
+        st.image("https://i.imgur.com/7M49Vnz.jpeg", width=250)
         st.write("Developed by **Ajayi Oluwatimileyin Daniel**.")
         st.markdown("---")
         st.write("📞 **WhatsApp/Call:** 09168090334")
-
+        
