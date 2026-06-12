@@ -3,45 +3,51 @@ import pandas as pd
 import plotly.express as px
 import joblib
 
-# --- 1. PREMIUM WHITE THEME & STYLING ---
+# --- 1. PREMIUM WHITE THEME & BLUE SIDEBAR CSS ---
 st.set_page_config(page_title="Timmytech Admission Forecast", layout="wide")
 st.markdown("""
     <style>
     .stApp { background-color: #ffffff; }
-    section[data-testid="stSidebar"] { background-color: #f8f9fa; }
-    div.stButton > button { width: 100%; border-radius: 10px; background-color: #6366f1; color: white; font-weight: bold; height: 3.5em; }
-    .css-1544g2n { padding-top: 2rem; }
+    /* Deep Blue Sidebar */
+    section[data-testid="stSidebar"] { background-color: #1e3a8a; color: white; padding-top: 40px; }
+    section[data-testid="stSidebar"] * { color: white !important; }
+    /* Button Styling */
+    div.stButton > button { width: 100%; border-radius: 8px; background-color: #3b82f6; color: white; font-weight: bold; height: 3.5em; }
+    /* Maximize Sidebar Spacing */
+    .stRadio { padding-top: 30px; padding-bottom: 30px; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. MODEL LOADING ---
+# --- 2. MODEL & SESSION ---
 pipeline = joblib.load("final_pipeline.pkl")
 if "history" not in st.session_state: st.session_state.history = []
 
-# --- 3. ATTRACTIVE SIDEBAR ---
+# --- 3. SPACIOUS NAVIGATION SIDEBAR ---
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/3135/3135768.png", width=80)
-    st.title("Timmytech Console")
-    st.markdown("<br>", unsafe_allow_html=True)
+    # Modern Icon
+    st.image("https://cdn-icons-png.flaticon.com/512/2942/2942813.png", width=80) 
+    st.markdown("## Timmytech Console")
     
-    # Navigation with spacing
-    page = st.radio("Navigation", 
-                    ["📊 Dashboard", "🎯 Admission Forecast", "📋 History Log", "🖨️ Export Reports", "💬 Help & Support"], 
+    st.markdown("<br><br><br>", unsafe_allow_html=True)
+    
+    # Navigation with maximum spacing
+    page = st.radio("MAIN NAVIGATION", 
+                    ["Dashboard", "Admission Forecast", "History Log", "Export Reports", "Help & Support"], 
                     index=0)
-    st.markdown("<br><br><br><br>", unsafe_allow_html=True)
-    st.caption("System Status: 🟢 Online")
+    
+    st.markdown("<br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+    st.caption("Status: Online")
     st.write("Developed by: **Ajayi Oluwatimileyin Daniel**")
 
 # --- 4. PAGE LOGIC ---
 
-if page == "📊 Dashboard":
-    st.title("🚀 Welcome to Timmytech Admission Forecast System")
-    st.subheader("Your Future, Predicted with Precision.")
+if page == "Dashboard":
+    st.title(" Welcome to Timmytech Admission Forecast System")
     st.image("https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2000", use_column_width=True)
-    st.markdown("### Experience the future of intelligent admission forecasting.")
+    st.markdown("### Intelligent predictive analytics for your academic journey.")
 
-elif page == "🎯 Admission Forecast":
-    st.title("🎯 Admission Forecast Portal")
+elif page == "Admission Forecast":
+    st.title(" Admission Forecast Portal")
     col1, col2 = st.columns([1, 1])
     
     with col1:
@@ -51,47 +57,36 @@ elif page == "🎯 Admission Forecast":
         waec = st.slider("WAEC Score", 0, 100, 50)
         intv = st.slider("Interview Score", 0, 100, 50)
         
-        if st.button("🚀 Run Forecast Now"):
+        if st.button(" Run Forecast Now"):
             input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [waec], "interview_score": [intv]})
             prob = float(pipeline.predict(input_data)[0])
-            # Logic Correction: 0.5 (50%) is the new threshold
             status = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
             st.session_state.history.append({"name": name, "status": status, "prob": prob, "jamb": jamb, "waec": waec, "intv": intv})
             
             with col2:
                 st.subheader("Analysis Outcome")
                 st.metric("Admission Probability", f"{prob:.1%}")
-                if status == "QUALIFIED": st.success(f"FINAL DECISION: {status} ✅")
-                else: st.error(f"FINAL DECISION: {status} ❌")
+                if status == "QUALIFIED": st.success(f"FINAL DECISION: {status}")
+                else: st.error(f"FINAL DECISION: {status}")
                 
-                fig = px.bar(x=["JAMB", "WAEC", "INT"], y=[jamb/4, waec, intv], color=["JAMB", "WAEC", "INT"])
+                fig = px.bar(x=["JAMB", "WAEC", "INT"], y=[jamb/4, waec, intv])
                 st.plotly_chart(fig, use_container_width=True)
 
-elif page == "📋 History Log":
+elif page == "History Log":
     st.title("📋 Prediction History")
     st.table(pd.DataFrame(st.session_state.history))
 
-elif page == "🖨️ Export Reports":
-    st.title("🖨️ Official Certificates")
+elif page == "Export Reports":
+    st.title("🖨️ Export Official Reports")
     for student in st.session_state.history:
-        report = f"""--- TIMMYTECH OFFICIAL ADMISSION CERTIFICATE ---
-Candidate Name: {student['name']}
-JAMB Score: {student['jamb']}
-WAEC Score: {student['waec']}
-Interview Score: {student['intv']}
-Admission Probability: {student['prob']:.1%}
-FINAL DECISION: {student['status']}
---------------------------------------------------"""
-        st.download_button(f"Download Certificate: {student['name']}", report, f"{student['name']}_certificate.txt")
+        report_text = f"TIMMYTECH OFFICIAL ADMISSION REPORT\nName: {student['name']}\nDecision: {student['status']}\nProbability: {student['prob']:.1%}\nJAMB: {student['jamb']}\nWAEC: {student['waec']}\nInterview: {student['intv']}"
+        st.download_button(f"Download Report: {student['name']}", report_text, f"{student['name']}_report.txt")
 
-elif page == "💬 Help & Support":
-    st.title("💬 Help Center")
-    st.image("https://cdn-icons-png.flaticon.com/512/1000/1000946.png", width=150)
-    st.write("### About Timmytech")
-    st.write("Timmytech is a high-performance predictive AI developed by **Ajayi Oluwatimileyin Daniel**. It uses advanced Linear Regression to analyze student metrics and provide unbiased admission outlooks.")
+elif page == "Help & Support":
+    st.title("💬 Help & Support")
+    st.image("https://cdn-icons-png.flaticon.com/512/3062/3062634.png", width=120)
+    st.write("Timmytech is a predictive AI system for admission management. Created by **Ajayi Oluwatimileyin Daniel**.")
     st.markdown("---")
-    st.write("### Contact Support")
-    st.write("📞 WhatsApp/Call: **09168090334**")
-    st.write("👤 Facebook: **Ajayi oluwatimileyin Daniel**")
-    st.write("🎵 TikTok: **Doctor Timmy**")
-
+    st.write("📞 **WhatsApp/Call:** 09168090334")
+    st.write("👤 **Facebook:** Ajayi oluwatimileyin Daniel")
+    st.write("🎵 **TikTok:** Doctor Timmy")
