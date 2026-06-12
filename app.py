@@ -4,7 +4,7 @@ import plotly.express as px
 import joblib
 
 # --- 1. PREMIUM WHITE THEME & BLUE SIDEBAR CSS ---
-st.set_page_config(page_title="Timmytech Admission Forecast", layout="wide")
+st.set_page_config(page_title="Timmytech Admission Forecast") # Global default
 st.markdown("""
     <style>
     .stApp { background-color: #ffffff; }
@@ -38,16 +38,20 @@ if page == "Dashboard":
     if len(st.session_state.history) > 0:
         df = pd.DataFrame(st.session_state.history)
         st.subheader("System Analytics Overview")
+        # Added Cards Container
         c1, c2, c3 = st.columns(3)
-        c1.metric("Total Applicants", len(df))
-        c2.metric("Success Rate", f"{(len(df[df['status'] == 'QUALIFIED']) / len(df)) * 100:.1f}%")
-        c3.metric("Avg. Probability", f"{df['prob'].mean() * 100:.1f}%")
+        with c1: st.info(f"Total Applicants: **{len(df)}**")
+        with c2: st.success(f"Success Rate: **{(len(df[df['status'] == 'QUALIFIED']) / len(df)) * 100:.1f}%**")
+        with c3: st.warning(f"Avg. Probability: **{df['prob'].mean() * 100:.1f}%**")
     else:
         st.info("Run your first forecast in the 'Admission Forecast' tab to see analytics here!")
     st.markdown("### Intelligent predictive analytics for your academic journey.")
 
 elif page == "Admission Forecast":
-    st.title(" Admission Forecast Portal")
+    # Applying "Wide" layout here as requested
+    st.markdown('<div style="width: 100%;">', unsafe_allow_html=True) 
+    st.title("Admission Forecast Portal")
+    
     col1, col2 = st.columns([1, 1])
     with col1:
         st.subheader("Student Profile Inputs")
@@ -56,7 +60,7 @@ elif page == "Admission Forecast":
         waec = st.slider("WAEC Score", 0, 100, 50)
         intv = st.slider("Interview Score", 0, 100, 50)
         
-        if st.button(" Run Forecast Now"):
+        if st.button("Run Forecast Now"):
             if not name.strip():
                 st.error("Please enter a student name.")
             else:
@@ -66,21 +70,25 @@ elif page == "Admission Forecast":
                 st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "waec": waec, "intv": intv}
                 st.session_state.history.append(st.session_state.last_result)
             
+            # --- SUGGESTION: RESULT DIRECTLY UNDER BUTTON ---
+            if st.session_state.last_result:
+                res = st.session_state.last_result
+                if res['status'] == "QUALIFIED": st.success(f"FINAL DECISION: {res['status']}")
+                else: st.error(f"FINAL DECISION: {res['status']}")
+                # --- SUGGESTION: AI CHAT ADVICE ---
+                st.info(f"💡 **AI Suggestion:** Your score of {res['prob']:.1%} suggests focusing on { 'Interview' if res['intv'] < 60 else 'academic core subjects' } to improve future probability.")
+
     with col2:
-        # Check for existence of result before rendering to avoid TypeError
         if st.session_state.last_result:
             res = st.session_state.last_result
             st.markdown('<div class="result-card">', unsafe_allow_html=True)
-            st.subheader("Analysis Outcome")
-            st.metric("Admission Probability", f"{res['prob']:.1%}")
-            if res['status'] == "QUALIFIED": st.success(f"FINAL DECISION: {res['status']}")
-            else: st.error(f"FINAL DECISION: {res['status']}")
-            
+            st.subheader("Visual Analysis")
             df_plot = pd.DataFrame({"Metric": ["JAMB", "WAEC", "INT"], "Score": [res['jamb']/4, res['waec'], res['intv']]})
             fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
             fig.add_hline(y=50, line_dash="dash", line_color="red", annotation_text="Threshold")
             st.plotly_chart(fig, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 elif page == "History Log":
     st.title("📋 Prediction History")
@@ -91,24 +99,12 @@ elif page == "History Log":
 
 elif page == "Export Reports":
     st.title("🖨️ Export Official Reports")
-    st.image("https://img.freepik.com/free-vector/data-report-concept-illustration_114360-557.jpg", width=200)
-    
-    # FIXED: Added a unique string to the key to prevent DuplicateElementId error
     for i, s in enumerate(st.session_state.history):
         txt = f"TIMMYTECH REPORT\nName: {s['name']}\nDecision: {s['status']}\nProb: {s['prob']:.1%}"
-        st.download_button(
-            label=f"Download: {s['name']}", 
-            data=txt, 
-            file_name=f"{s['name']}_report.txt", 
-            key=f"dl_{i}_{s['name']}" 
-        )
+        st.download_button(label=f"Download: {s['name']}", data=txt, file_name=f"{s['name']}_report.txt", key=f"dl_{i}_{s['name']}")
 
 elif page == "Help & Support":
     st.title("💬 Help & Support")
-    st.image("https://cdn-icons-png.flaticon.com/512/3062/3062634.png", width=120)
-    st.write("Timmytech is a predictive AI system for admission management.")
     st.write("Developed by **Ajayi Oluwatimileyin Daniel**.")
     st.markdown("---")
     st.write("📞 **WhatsApp/Call:** 09168090334")
-    st.write("👤 **Facebook:** Ajayi oluwatimileyin Daniel")
-    
