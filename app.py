@@ -9,51 +9,80 @@ def check_password():
         st.session_state.password_correct = False
 
     if not st.session_state.password_correct:
-        # PINTEREST-STYLE UI CSS
+        # PINTEREST-STYLE UI CSS (CENTERED)
         st.markdown("""
             <style>
+            /* Force full screen height and center everything */
             .stApp { 
-                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .login-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                max-width: 400px;
+                padding: 20px;
             }
             .login-card { 
-                text-align: center; padding: 40px; border-radius: 20px; 
-                background: rgba(255, 255, 255, 0.9); 
-                box-shadow: 0px 10px 25px rgba(0,0,0,0.2);
-                max-width: 350px; margin: 50px auto;
-                border: 2px solid #ffffff;
+                text-align: center; 
+                padding: 30px; 
+                border-radius: 20px; 
+                background: rgba(255, 255, 255, 0.95); 
+                box-shadow: 0px 10px 30px rgba(0,0,0,0.3);
+                width: 100%;
+                border: 1px solid #ddd;
             }
             .profile-img { 
-                border-radius: 50%; width: 120px; height: 120px; 
-                object-fit: cover; margin-bottom: 20px; 
-                border: 5px solid #ffffff;
-                box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+                border-radius: 50%; 
+                width: 120px; 
+                height: 120px; 
+                object-fit: cover; 
+                margin: 0 auto 20px auto; 
+                border: 4px solid #ffffff;
+                display: block;
             }
-            /* Input field styling with borders */
+            /* Styling inputs to look like the screenshot */
+            div[data-testid="stTextInput"] {
+                margin-bottom: 15px;
+            }
             div[data-testid="stTextInput"] > div > div > input {
-                border: 1px solid #bdc3c7 !important;
-                border-radius: 8px !important;
+                border: 1px solid #ccc !important;
+                border-radius: 10px !important;
+                padding: 10px !important;
             }
             div.stButton > button { 
-                width: 100%; border-radius: 8px; 
-                background-color: #3b82f6; color: white; font-weight: bold; 
-                border: 1px solid #2563eb;
+                width: 100%; 
+                border-radius: 10px; 
+                background-color: #ffffff; 
+                color: #333; 
+                font-weight: bold; 
+                border: 1px solid #ccc;
+                margin-top: 10px;
             }
             </style>
             """, unsafe_allow_html=True)
         
-        st.markdown('<div class="login-card">', unsafe_allow_html=True)
-        # Using your profile picture for the circle
+        # Wrapping in a container to force centering
+        st.markdown('<div class="login-container"><div class="login-card">', unsafe_allow_html=True)
         st.markdown('<img src="https://i.imgur.com/KyKv9T9.png" class="profile-img">', unsafe_allow_html=True)
-        st.markdown("### LOGIN UI")
+        st.markdown("<h2 style='text-align: center; color: #333;'>LOGIN UI</h2>", unsafe_allow_html=True)
+        
         user = st.text_input("USERNAME")
         password = st.text_input("PASSWORD", type="password")
+        
         if st.button("LOGIN"):
             if user == "Timmy" and password == "1234":
                 st.session_state.password_correct = True
                 st.rerun()
             else:
                 st.error("Invalid credentials")
-        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown('</div></div>', unsafe_allow_html=True)
         return False
     return True
 
