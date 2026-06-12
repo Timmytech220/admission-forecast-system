@@ -9,29 +9,45 @@ def check_password():
         st.session_state.password_correct = False
 
     if not st.session_state.password_correct:
+        # PINTEREST-STYLE UI CSS
         st.markdown("""
             <style>
-            .stApp { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); }
+            .stApp { 
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
+            }
             .login-card { 
-                text-align: center; padding: 40px; border-radius: 25px; 
-                background: rgba(255, 255, 255, 0.95); box-shadow: 0px 10px 30px rgba(0,0,0,0.5);
-                max-width: 350px; margin: 80px auto;
+                text-align: center; padding: 40px; border-radius: 20px; 
+                background: rgba(255, 255, 255, 0.9); 
+                box-shadow: 0px 10px 25px rgba(0,0,0,0.2);
+                max-width: 350px; margin: 50px auto;
+                border: 2px solid #ffffff;
             }
             .profile-img { 
                 border-radius: 50%; width: 120px; height: 120px; 
-                object-fit: cover; margin-bottom: 15px; border: 4px solid #3b82f6; 
+                object-fit: cover; margin-bottom: 20px; 
+                border: 5px solid #ffffff;
+                box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
             }
-            div.stButton > button { width: 100%; border-radius: 50px; background-color: #1e3a8a; color: white; font-weight: bold; }
+            /* Input field styling with borders */
+            div[data-testid="stTextInput"] > div > div > input {
+                border: 1px solid #bdc3c7 !important;
+                border-radius: 8px !important;
+            }
+            div.stButton > button { 
+                width: 100%; border-radius: 8px; 
+                background-color: #3b82f6; color: white; font-weight: bold; 
+                border: 1px solid #2563eb;
+            }
             </style>
             """, unsafe_allow_html=True)
         
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
+        # Using your profile picture for the circle
         st.markdown('<img src="https://i.imgur.com/KyKv9T9.png" class="profile-img">', unsafe_allow_html=True)
-        st.title("TIMMYTECH")
-        st.subheader("Login UI")
-        user = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-        if st.button("Login"):
+        st.markdown("### LOGIN UI")
+        user = st.text_input("USERNAME")
+        password = st.text_input("PASSWORD", type="password")
+        if st.button("LOGIN"):
             if user == "Timmy" and password == "1234":
                 st.session_state.password_correct = True
                 st.rerun()
@@ -55,7 +71,6 @@ st.markdown("""
 
 # --- 3. EXECUTION ---
 if check_password():
-    # Load model & initialize state
     pipeline = joblib.load("final_pipeline.pkl")
     if "history" not in st.session_state: st.session_state.history = []
     if "last_result" not in st.session_state: st.session_state.last_result = None
