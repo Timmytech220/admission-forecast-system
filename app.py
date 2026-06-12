@@ -5,82 +5,80 @@ import joblib
 
 import streamlit as st
 
-# --- 1. AUTHENTICATION ---
-def check_password():
+
+           def check_password():
     if "password_correct" not in st.session_state:
         st.session_state.password_correct = False
 
     if not st.session_state.password_correct:
-        # PINTEREST-STYLE UI CSS (CENTERED EVERYTHING)
+        # PURE CSS FOR A PROFESSIONAL, CENTERED CARD
         st.markdown("""
             <style>
-            .stApp { 
-                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            /* Remove default Streamlit background/padding */
+            [data-testid="stAppViewContainer"] {
+                background-color: #f0f2f6;
             }
-            .login-container {
+            .login-wrapper {
                 display: flex;
-                flex-direction: column;
-                align-items: center;
                 justify-content: center;
+                align-items: center;
                 min-height: 80vh;
             }
-            .login-card { 
-                text-align: center; 
-                padding: 40px; 
-                border-radius: 25px; 
-                background: rgba(255, 255, 255, 1); 
-                box-shadow: 0px 15px 40px rgba(0,0,0,0.3);
+            .login-card {
+                background: white;
+                padding: 40px;
+                border-radius: 20px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
                 width: 100%;
-                max-width: 450px;
-                border: 2px solid #e0e0e0;
+                max-width: 380px;
+                text-align: center;
+                border: 1px solid #e1e4e8;
             }
-            .profile-img { 
-                border-radius: 50%; 
-                width: 150px; 
-                height: 150px; 
-                object-fit: cover; 
-                margin: 0 auto 20px auto; 
-                border: 6px solid #4facfe;
-                display: block;
+            .profile-img {
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 4px solid #3b82f6;
+                margin-bottom: 20px;
             }
-            h2 { color: #333; margin-bottom: 30px !important; }
-            
-            /* Enhanced Input fields */
-            div[data-testid="stTextInput"] { margin-bottom: 20px; }
-            div[data-testid="stTextInput"] > div > div > input {
-                border: 2px solid #ddd !important;
-                border-radius: 12px !important;
-                padding: 15px !important;
-                font-size: 16px !important;
+            .title {
+                font-size: 20px;
+                font-weight: 600;
+                color: #1f2937;
+                margin-bottom: 25px;
             }
-            
-            /* NEW: Centering the button container */
-            div.stButton {
-                display: flex;
-                justify-content: center;
+            /* Clean input styling */
+            div[data-testid="stTextInput"] input {
+                border-radius: 10px !important;
+                border: 1px solid #d1d5db !important;
             }
-            div.stButton > button { 
-                width: 100%; 
-                padding: 12px;
-                border-radius: 12px; 
-                background-color: #4facfe; 
-                color: white; 
-                font-weight: bold; 
-                font-size: 18px;
+            /* Button styling */
+            div.stButton > button {
+                width: 100%;
+                background-color: #3b82f6;
+                color: white;
                 border: none;
-                margin-top: 15px;
+                border-radius: 10px;
+                padding: 10px;
+                font-weight: 600;
+                margin-top: 10px;
+            }
+            div.stButton > button:hover {
+                background-color: #2563eb;
             }
             </style>
             """, unsafe_allow_html=True)
-        
-        st.markdown('<div class="login-container"><div class="login-card">', unsafe_allow_html=True)
+
+        # The Structure
+        st.markdown('<div class="login-wrapper"><div class="login-card">', unsafe_allow_html=True)
         st.markdown('<img src="https://i.imgur.com/KyKv9T9.png" class="profile-img">', unsafe_allow_html=True)
-        st.markdown("<h2>Admission Forecast System</h2>", unsafe_allow_html=True)
+        st.markdown('<div class="title">Admission Forecast System</div>', unsafe_allow_html=True)
         
-        user = st.text_input("USERNAME")
-        password = st.text_input("PASSWORD", type="password")
+        user = st.text_input("Username")
+        password = st.text_input("Password", type="password")
         
-        if st.button("LOGIN"):
+        if st.button("Login"):
             if user == "Timmy" and password == "1234":
                 st.session_state.password_correct = True
                 st.rerun()
@@ -90,7 +88,7 @@ def check_password():
         st.markdown('</div></div>', unsafe_allow_html=True)
         return False
     return True
-                    
+        
 
         
 # --- 2. PREMIUM THEME & SIDEBAR CSS ---
