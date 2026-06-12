@@ -21,16 +21,14 @@ st.markdown("""
 # --- 2. MODEL & SESSION ---
 pipeline = joblib.load("final_pipeline.pkl")
 if "history" not in st.session_state: st.session_state.history = []
+if "last_result" not in st.session_state: st.session_state.last_result = None
 
 # --- 3. SPACIOUS NAVIGATION SIDEBAR ---
 with st.sidebar:
-    # Modern Icon
     st.image("https://cdn-icons-png.flaticon.com/512/2942/2942813.png", width=80) 
     st.markdown("## Timmytech Console")
-    
     st.markdown("<br><br><br>", unsafe_allow_html=True)
     
-    # Navigation with maximum spacing
     page = st.radio("MAIN NAVIGATION", 
                     ["Dashboard", "Admission Forecast", "History Log", "Export Reports", "Help & Support"], 
                     index=0)
@@ -61,26 +59,43 @@ elif page == "Admission Forecast":
             input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [waec], "interview_score": [intv]})
             prob = float(pipeline.predict(input_data)[0])
             status = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
-            st.session_state.history.append({"name": name, "status": status, "prob": prob, "jamb": jamb, "waec": waec, "intv": intv})
             
-            with col2:
-                st.subheader("Analysis Outcome")
-                st.metric("Admission Probability", f"{prob:.1%}")
-                if status == "QUALIFIED": st.success(f"FINAL DECISION: {status}")
-                else: st.error(f"FINAL DECISION: {status}")
-                
-                fig = px.bar(x=["JAMB", "WAEC", "INT"], y=[jamb/4, waec, intv])
-                st.plotly_chart(fig, use_container_width=True)
+            # Store in state
+            st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "waec": waec, "intv": intv}
+            st.session_state.history.append(st.session_state.last_result)
+            
+    with col2:
+        if st.session_state.last_result:
+            res = st.session_state.last_result
+            st.subheader("Analysis Outcome")
+            st.metric("Admission Probability", f"{res['prob']:.1%}")
+            if res['status'] == "QUALIFIED": st.success(f"FINAL DECISION: {res['status']}")
+            else: st.error(f"FINAL DECISION: {res['status']}")
+            
+            fig = px.bar(x=["JAMB", "WAEC", "INT"], y=[res['jamb']/4, res['waec'], res['intv']])
+            st.plotly_chart(fig, use_container_width=True)
 
 elif page == "History Log":
     st.title("📋 Prediction History")
-    st.table(pd.DataFrame(st.session_state.history))
+    if st.session_state.history:
+        st.table(pd.DataFrame(st.session_state.history))
+    else:
+        st.write("No records yet.")
 
 elif page == "Export Reports":
     st.title("🖨️ Export Official Reports")
-    for student in st.session_state.history:
-        report_text = f"TIMMYTECH OFFICIAL ADMISSION REPORT\nName: {student['name']}\nDecision: {student['status']}\nProbability: {student['prob']:.1%}\nJAMB: {student['jamb']}\nWAEC: {student['waec']}\nInterview: {student['intv']}"
-        st.download_button(f"Download Report: {student['name']}", report_text, f"{student['name']}_report.txt")
+    if not st.session_state.history:
+        st.write("No reports available to export.")
+    else:
+        for i, student in enumerate(st.session_state.history):
+            report_text = f"TIMMYTECH OFFICIAL ADMISSION REPORT\nName: {student['name']}\nDecision: {student['status']}\nProbability: {student['prob']:.1%}\nJAMB: {student['jamb']}\nWAEC: {student['waec']}\nInterview: {student['intv']}"
+            # THE FIX: Added a unique key for each button using the index 'i'
+            st.download_button(
+                label=f"Download Report: {student['name']}", 
+                data=report_text, 
+                file_name=f"{student['name']}_report.txt",
+                key=f"dl_{i}"
+            )
 
 elif page == "Help & Support":
     st.title("💬 Help & Support")
@@ -90,3 +105,4 @@ elif page == "Help & Support":
     st.write("📞 **WhatsApp/Call:** 09168090334")
     st.write("👤 **Facebook:** Ajayi oluwatimileyin Daniel")
     st.write("🎵 **TikTok:** Doctor Timmy")
+
