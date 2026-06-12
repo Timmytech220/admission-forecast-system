@@ -5,8 +5,13 @@ import joblib
 
 import streamlit as st
 
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+import joblib
 
-           def check_password():
+# --- 1. AUTHENTICATION ---
+def check_password():
     if "password_correct" not in st.session_state:
         st.session_state.password_correct = False
 
@@ -14,7 +19,6 @@ import streamlit as st
         # PURE CSS FOR A PROFESSIONAL, CENTERED CARD
         st.markdown("""
             <style>
-            /* Remove default Streamlit background/padding */
             [data-testid="stAppViewContainer"] {
                 background-color: #f0f2f6;
             }
@@ -48,12 +52,10 @@ import streamlit as st
                 color: #1f2937;
                 margin-bottom: 25px;
             }
-            /* Clean input styling */
             div[data-testid="stTextInput"] input {
                 border-radius: 10px !important;
                 border: 1px solid #d1d5db !important;
             }
-            /* Button styling */
             div.stButton > button {
                 width: 100%;
                 background-color: #3b82f6;
@@ -64,13 +66,9 @@ import streamlit as st
                 font-weight: 600;
                 margin-top: 10px;
             }
-            div.stButton > button:hover {
-                background-color: #2563eb;
-            }
             </style>
             """, unsafe_allow_html=True)
 
-        # The Structure
         st.markdown('<div class="login-wrapper"><div class="login-card">', unsafe_allow_html=True)
         st.markdown('<img src="https://i.imgur.com/KyKv9T9.png" class="profile-img">', unsafe_allow_html=True)
         st.markdown('<div class="title">Admission Forecast System</div>', unsafe_allow_html=True)
@@ -88,8 +86,12 @@ import streamlit as st
         st.markdown('</div></div>', unsafe_allow_html=True)
         return False
     return True
-        
 
+# --- REMAINDER OF YOUR CODE STARTS HERE ---
+if check_password():
+    # Load your pipeline, sidebar, and pages...
+                    
+           
         
 # --- 2. PREMIUM THEME & SIDEBAR CSS ---
 st.set_page_config(page_title="Timmytech Admission Forecast")
