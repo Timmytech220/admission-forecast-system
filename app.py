@@ -2,112 +2,114 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import joblib
+from fpdf import FPDF
 
-# 1. SETUP: Wide layout
-st.set_page_config(page_title="Admission Analytics Console", page_icon="🎓", layout="wide")
+# --- 1. PREMIUM WHITE THEME CSS ---
+st.markdown("""
+    <style>
+    /* Main Layout */
+    .stApp { background-color: #ffffff; color: #333; }
+    /* Sidebar Styling */
+    section[data-testid="stSidebar"] { background-color: #f4f7f6; padding-top: 20px; }
+    /* Button Styling */
+    div.stButton > button { width: 100%; border-radius: 8px; background-color: #4A90E2; color: white; font-weight: bold; }
+    /* Headers */
+    h1, h2, h3 { color: #2C3E50; }
+    </style>
+    """, unsafe_allow_html=True)
 
-# 2. MODEL LOADING
-@st.cache_resource
-def load_pipeline():
-    return joblib.load("final_pipeline.pkl")
+# --- 2. SETUP & MODEL ---
+st.set_page_config(page_title="Timmytech Admission Forecast", layout="wide")
+pipeline = joblib.load("final_pipeline.pkl")
 
-pipeline = load_pipeline()
+if "history" not in st.session_state: st.session_state.history = []
 
-# 3. INITIALIZATION
-if "history" not in st.session_state:
-    st.session_state.history = []
-
-# 4. SIDEBAR NAVIGATION
+# --- 3. ATTRACTIVE SIDEBAR ---
 with st.sidebar:
-    st.title("🎓 Admission Console")
-    # Using index=0 to make "Dashboard" the default view
-    page = st.radio("Navigation", ["Dashboard", "Forecast", "History", "Download", "Help/Docs"], index=0)
+    st.image("https://cdn-icons-png.flaticon.com/512/2942/2942813.png", width=80)
+    st.title("Timmytech Console")
+    st.markdown("---")
+    
+    # Navigation with Icons
+    page = st.radio("Navigation", 
+                    ["📊 Dashboard", "🎯 Admission Forecast", "📋 History Log", "🖨️ Export Reports", "💬 Help & Support"], 
+                    index=0)
     
     st.markdown("---")
-    st.subheader("System Performance")
-    st.caption("Model: Linear Regression")
-    st.caption("Status: 🟢 Online")
-    st.caption(f"Total Forecasts: {len(st.session_state.history)}")
+    st.subheader("System Status")
+    st.success("🟢 Online")
+    st.caption(f"Forecasts Processed: {len(st.session_state.history)}")
     st.markdown("---")
-    st.write("Developed by: [Your Name]")
+    st.write("Built by: **Ajayi Oluwatimileyin Daniel**")
 
-# 5. PAGE LOGIC (Standardized for Desktop)
+# --- 4. PAGE CONTENT ---
 
-# DASHBOARD PAGE
-if page == "Dashboard":
-    st.title("📊 Welcome to the Analytics Dashboard")
-    st.markdown("This system provides real-time predictive insights for institutional admission planning.")
+if page == "📊 Dashboard":
+    st.title("Welcome to Timmytech Admission Forecast System")
+    st.markdown("### Empowering academic excellence through data-driven predictions.")
+    st.image("https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1400", use_column_width=True)
+    st.info("Navigate using the sidebar to begin your forecasting journey.")
+
+elif page == "🎯 Admission Forecast":
+    st.title("🎯 Admission Forecast Portal")
+    col1, col2 = st.columns([1, 1])
     
-    col1, col2 = st.columns(2)
     with col1:
-        st.image("https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=600", caption="Predictive Analytics Engine")
-    with col2:
-        st.success("System is fully operational.")
-        st.write("Use the 'Forecast' tab in the sidebar to begin analyzing student profiles.")
-
-# FORECAST PAGE (Includes all your specific inputs)
-elif page == "Forecast":
-    st.title("🚀 Admission Forecast Engine")
-    col_left, col_right = st.columns([1, 2])
-    
-    with col_left:
-        st.subheader("Student Profile Inputs")
-        name = st.text_input("Full Name", placeholder="Enter student name...")
-        jamb = st.slider("JAMB Score", 100, 400, 250)
-        waec = st.slider("WAEC Score", 0, 100, 50)
-        intv = st.slider("Interview Score", 0, 100, 50)
-        predict_btn = st.button("🚀 Analyze Now", type="primary", use_container_width=True)
-    
-    with col_right:
-        if predict_btn:
-            # Model execution
+        st.subheader("Student Profile Information")
+        name = st.text_input("Full Name")
+        jamb = st.slider("JAMB Score (100-400)", 100, 400, 250)
+        waec = st.slider("WAEC Score (0-100)", 0, 100, 50)
+        intv = st.slider("Interview Score (0-100)", 0, 100, 50)
+        
+        if st.button("🚀 Analyze Now"):
             input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [waec], "interview_score": [intv]})
             prob = float(pipeline.predict(input_data)[0])
-            st.session_state.history.append({"name": name or "Anonymous", "prob": prob})
+            status = "QUALIFIED" if prob >= 0.7 else "NOT QUALIFIED"
+            st.session_state.history.append({"name": name, "jamb": jamb, "waec": waec, "intv": intv, "prob": prob, "status": status})
             
-            # KPI Layout
-            k1, k2 = st.columns(2)
-            k1.metric("Admission Probability", f"{prob:.1%}")
-            if prob >= 0.7: k2.success("STATUS: QUALIFIED")
-            elif prob >= 0.4: k2.warning("STATUS: BORDERLINE")
-            else: k2.error("STATUS: NOT QUALIFIED")
-            
-            # Insights & Chart
-            st.subheader("💡 Model Insight")
-            st.info("The model indicates high potential." if prob >= 0.7 else "Further preparation recommended.")
-            
-            fig = px.bar(pd.DataFrame({"Cat": ["JAMB", "WAEC", "INT"], "Val": [jamb/4, waec, intv]}), 
-                         x="Cat", y="Val", color="Val", color_continuous_scale="RdYlGn")
-            st.plotly_chart(fig, use_container_width=True)
+            with col2:
+                st.subheader("Analysis Results")
+                st.metric("Admission Probability", f"{prob:.1%}")
+                if status == "QUALIFIED": st.success(f"STATUS: {status}")
+                else: st.error(f"STATUS: {status}")
+                
+                fig = px.bar(x=["JAMB", "WAEC", "INT"], y=[jamb/4, waec, intv], 
+                             color=[jamb/4, waec, intv], color_continuous_scale="RdYlGn")
+                st.plotly_chart(fig, use_container_width=True)
 
-# HISTORY PAGE
-elif page == "History":
-    st.title("🕒 Prediction Log")
-    if st.session_state.history:
-        st.table(pd.DataFrame(st.session_state.history))
-    else:
-        st.info("No prediction history recorded yet.")
+elif page == "📋 History Log":
+    st.title("📋 Detailed Prediction History")
+    # Separate logic
+    q_data = [s for s in st.session_state.history if s['status'] == "QUALIFIED"]
+    nq_data = [s for s in st.session_state.history if s['status'] == "NOT QUALIFIED"]
+    
+    st.subheader("✅ Qualified Candidates")
+    if q_data: st.table(pd.DataFrame(q_data))
+    else: st.write("No qualified candidates found.")
+        
+    st.subheader("❌ Not Qualified Candidates")
+    if nq_data: st.table(pd.DataFrame(nq_data))
+    else: st.write("No disqualified candidates found.")
 
-# DOWNLOAD PAGE
-elif page == "Download":
-    st.title("📥 Export Reports")
-    st.write("Click below to download your full historical analysis report.")
-    if st.session_state.history:
-        st.download_button("Download History as CSV", data=pd.DataFrame(st.session_state.history).to_csv(), file_name="history.csv")
-    else:
-        st.warning("No data available to download.")
+elif page == "🖨️ Export Reports":
+    st.title("🖨️ Individual Report Printing")
+    for student in st.session_state.history:
+        if st.button(f"Generate PDF for {student['name']}"):
+            # Simple PDF logic
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Arial", 'B', 16)
+            pdf.cell(200, 10, txt="Timmytech Official Admission Report", ln=True, align='C')
+            pdf.set_font("Arial", size=12)
+            pdf.cell(200, 10, txt=f"Candidate Name: {student['name']}", ln=True)
+            pdf.cell(200, 10, txt=f"Final Decision: {student['status']}", ln=True)
+            st.download_button(f"Click to Download {student['name']}_Report.pdf", pdf.output(dest='S').encode('latin-1'), f"{student['name']}_report.pdf", "application/pdf")
 
-# HELP/DOCS PAGE
-elif page == "Help/Docs":
-    st.title("📚 User Guide & Documentation")
+elif page == "💬 Help & Support":
+    st.title("💬 Help Center")
+    st.write("I am **Ajayi Oluwatimileyin Daniel**, your lead developer for Timmytech.")
     st.markdown("""
-    ### System Architecture
-    This system implements a **Linear Regression** model to predict admission probabilities.
-    
-    * **JAMB Score:** Weighted contribution to the admission outcome.
-    * **WAEC Score:** Represents O'Level performance.
-    * **Interview Score:** Qualitative assessment metric.
-    
-    For support, please contact the system administrator.
+    ### System Explanation
+    - **How it works:** Our system maps your entrance exam scores against historical data.
+    - **Need help?** If you have specific questions about your scores, feel free to contact the administrator.
     """)
-    
