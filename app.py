@@ -3,6 +3,23 @@ import pandas as pd
 import plotly.express as px
 import joblib
 
+
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+import streamlit as st
+
+
+def save_data(name, status, prob, jamb, olevel, intv):
+    scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets']
+    # This reads the secret you just saved in the dashboard
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(dict(st.secrets["gcp_service_account"]), scope)
+    client = gspread.authorize(creds)
+    
+    # Open the sheet by its name (Make sure it is exactly: Admission_Forecast_Data)
+    sheet = client.open("Admission_Forecast_Data").sheet1
+    sheet.append_row([name, status, prob, jamb, olevel, intv])
+
+
 # --- 1. CONFIG & STYLING ---
 st.set_page_config(page_title="Timmytech Admission Forecast", layout="wide")
 st.markdown("""
