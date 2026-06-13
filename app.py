@@ -7,24 +7,21 @@ import joblib
 st.set_page_config(page_title="Timmytech Admission Forecast", layout="wide")
 st.markdown("""
     <style>
-    /* Global Sidebar Styling */
     section[data-testid="stSidebar"] { background-color: #1e3a8a !important; color: white !important; }
     section[data-testid="stSidebar"] * { color: white !important; }
     
-    /* Login Page Theme */
+    /* Optimized Login Container */
     .login-container { 
         padding: 40px; 
         border-radius: 20px; 
-        background-color: #eef2ff; 
-        border: 2px solid #1e3a8a;
-        margin-top: 50px;
+        background: linear-gradient(180deg, #ffffff 0%, #eef2ff 100%); 
+        border: 1px solid #1e3a8a;
+        box-shadow: 0px 10px 30px rgba(0,0,0,0.1);
     }
     
-    /* Result Card Styling */
     .result-card { border: 1px solid #1e3a8a; padding: 20px; border-radius: 10px; background-color: #ffffff; }
-    
-    /* Headers */
     h1, h2 { color: #1e3a8a !important; }
+    .help-img { border-radius: 50%; width: 150px; height: 150px; border: 4px solid #1e3a8a; object-fit: cover; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -32,10 +29,10 @@ st.markdown("""
 if "logged_in" not in st.session_state: st.session_state.logged_in = False
 
 if not st.session_state.logged_in:
-    c1, mid, c3 = st.columns([1, 2, 1])
+    c1, mid, c3 = st.columns([1, 1.5, 1])
     with mid:
         st.markdown("<div class='login-container'>", unsafe_allow_html=True)
-        st.markdown("<h2 style='text-align: center;'>🔐 Timmytech Access</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: center;'>🔐 Timmytech Secure Access</h2>", unsafe_allow_html=True)
         user = st.text_input("Username")
         pwd = st.text_input("Password", type="password")
         if st.button("Login", use_container_width=True):
@@ -61,7 +58,8 @@ with st.sidebar:
 
 # --- 5. PAGE LOGIC ---
 if page == "Dashboard":
-    st.title("Welcome to Timmytech System")
+    st.title("Welcome to Timmytech Admission Forecast System")
+    st.image("https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2000", use_container_width=True)
     if len(st.session_state.history) > 0:
         df = pd.DataFrame(st.session_state.history)
         c1, c2, c3 = st.columns(3)
@@ -80,8 +78,7 @@ elif page == "Admission Forecast":
         intv = st.slider("Interview Score", 0, 100, 50)
         
         if st.button("Run Forecast Now", type="primary"):
-            if not name.strip(): 
-                st.error("⚠️ Please enter a student name.")
+            if not name.strip(): st.error("⚠️ Please enter a student name.")
             else:
                 input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [olevel], "interview_score": [intv]})
                 prob = float(pipeline.predict(input_data)[0])
@@ -113,7 +110,13 @@ elif page == "Export Reports":
 
 elif page == "Help & Support":
     st.title("💬 Help & Support Center")
-    st.write("📞 **WhatsApp/Call:** 09168090334")
-    st.write("📱 **Facebook:** [facebook.com/Timmytech](https://facebook.com/Timmytech)")
-    st.write("🎵 **TikTok:** [tiktok.com/@Timmytech](https://tiktok.com/@Timmytech)")
+    c1, c2 = st.columns([1, 2])
+    with c1:
+        st.markdown('<img src="https://i.imgur.com/7M49Vnz.jpeg" class="help-img">', unsafe_allow_html=True)
+    with c2:
+        st.subheader("Developer Info")
+        st.write("Developed by: **Ajayi Oluwatimileyin Daniel**")
+        st.write("📞 **WhatsApp/Call:** 09168090334")
+        st.write("📱 **Facebook:** [facebook.com/Timmytech](https://facebook.com/Timmytech)")
+        st.write("🎵 **TikTok:** [tiktok.com/@Timmytech](https://tiktok.com/@Timmytech)")
         
