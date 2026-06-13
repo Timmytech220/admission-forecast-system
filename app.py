@@ -9,7 +9,6 @@ st.markdown("""
     <style>
     section[data-testid="stSidebar"] { background-color: #1e3a8a !important; color: white !important; }
     section[data-testid="stSidebar"] * { color: white !important; }
-    div[role="radiogroup"] > label { margin-bottom: 30px !important; display: block; font-size: 1.1em; }
     .help-img { border-radius: 50%; width: 180px; height: 180px; border: 5px solid #3b82f6; object-fit: cover; }
     .result-card { border: 1px solid #e0e0e0; padding: 20px; border-radius: 10px; background-color: #f9f9f9; }
     </style>
@@ -20,18 +19,20 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
 if not st.session_state.logged_in:
-    st.title("🔐 Secure Login")
-    user = st.text_input("Username")
-    pwd = st.text_input("Password", type="password")
-    if st.button("Login"):
-        if user == "Timmy" and pwd == "1234":
-            st.session_state.logged_in = True
-            st.rerun()
-        else:
-            st.error("Invalid credentials!")
+    c1, mid, c3 = st.columns([1, 2, 1])
+    with mid:
+        st.markdown("<h2 style='text-align: center;'>🔐 Timmytech Access</h2>", unsafe_allow_html=True)
+        user = st.text_input("Username", placeholder="Enter your username")
+        pwd = st.text_input("Password", type="password", placeholder="Enter your password")
+        if st.button("Login", use_container_width=True):
+            if user == "Timmy" and pwd == "1234":
+                st.session_state.logged_in = True
+                st.rerun()
+            else:
+                st.error("Invalid credentials!")
     st.stop()
 
-# Load model outside of any logic blocks to fix IndentationError
+# Load model
 pipeline = joblib.load("final_pipeline.pkl")
 
 if "history" not in st.session_state: st.session_state.history = []
@@ -42,7 +43,7 @@ with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2942/2942813.png", width=80) 
     st.markdown("## Timmytech Console")
     page = st.radio("MAIN NAVIGATION", ["Dashboard", "Admission Forecast", "History Log", "Export Reports", "Help & Support"], index=0)
-    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.divider()
     st.caption("Status: Online")
     st.write("Developed by: **Ajayi Oluwatimileyin Daniel**")
 
@@ -54,9 +55,9 @@ if page == "Dashboard":
         df = pd.DataFrame(st.session_state.history)
         st.subheader("System Analytics Overview")
         c1, c2, c3 = st.columns(3)
-        with c1: st.info(f"Total: **{len(df)}**")
-        with c2: st.success(f"Success: **{(len(df[df['status'] == 'QUALIFIED']) / len(df)) * 100:.1f}%**")
-        with c3: st.warning(f"Avg Prob: **{df['prob'].mean() * 100:.1f}%**")
+        c1.metric("Total Forecasts", len(df))
+        c2.metric("Success Rate", f"{(len(df[df['status'] == 'QUALIFIED']) / len(df)) * 100:.1f}%")
+        c3.metric("Avg Probability", f"{df['prob'].mean() * 100:.1f}%")
 
 elif page == "Admission Forecast":
     st.title("Admission Forecast Portal")
@@ -67,7 +68,7 @@ elif page == "Admission Forecast":
         jamb = st.slider("JAMB Score", 100, 400, 250)
         waec = st.slider("WAEC Score", 0, 100, 50)
         intv = st.slider("Interview Score", 0, 100, 50)
-        if st.button("Run Forecast Now"):
+        if st.button("Run Forecast Now", type="primary"):
             if not name.strip(): st.error("Please enter a student name.")
             else:
                 input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [waec], "interview_score": [intv]})
@@ -75,13 +76,12 @@ elif page == "Admission Forecast":
                 status = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
                 st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "waec": waec, "intv": intv}
                 st.session_state.history.append(st.session_state.last_result)
-            if st.session_state.last_result:
-                res = st.session_state.last_result
-                st.success(f"FINAL DECISION: {res['status']}")
-                st.info(f"💡 **AI Suggestion:** Your score of {res['prob']:.1%} suggests focusing on { 'Interview' if res['intv'] < 60 else 'academic core subjects' }.")
+    
     with col2:
         if st.session_state.last_result:
             res = st.session_state.last_result
+            st.success(f"FINAL DECISION: {res['status']}")
+            st.info(f"💡 **AI Suggestion:** Your score of {res['prob']:.1%} suggests focusing on { 'Interview' if res['intv'] < 60 else 'academic core subjects' }.")
             st.markdown('<div class="result-card">', unsafe_allow_html=True)
             st.subheader("Visual Analysis")
             df_plot = pd.DataFrame({"Metric": ["JAMB", "WAEC", "INT"], "Score": [res['jamb']/4, res['waec'], res['intv']]})
@@ -91,7 +91,8 @@ elif page == "Admission Forecast":
 
 elif page == "History Log":
     st.title("📋 Prediction History")
-    if st.session_state.history: st.dataframe(pd.DataFrame(st.session_state.history), use_container_width=True)
+    if st.session_state.history: 
+        st.dataframe(pd.DataFrame(st.session_state.history), use_container_width=True, hide_index=True)
     else: st.write("No records yet.")
 
 elif page == "Export Reports":
@@ -109,9 +110,8 @@ elif page == "Help & Support":
         st.subheader("Developer Info")
         st.write("Developed by: **Ajayi Oluwatimileyin Daniel**")
         st.write("System designed to provide predictive admission analytics.")
-    st.markdown("---")
+    st.divider()
     st.subheader("Contact & Socials")
     st.write("📞 **WhatsApp/Call:** 09168090334")
     st.write("📱 **Facebook:** facebook.com/Timmytech")
     st.write("🎵 **TikTok:** tiktok.com/@Timmytech")
-        
