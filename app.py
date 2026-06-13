@@ -18,7 +18,6 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # --- 3. EXECUTION ---
-if check_password():
     pipeline = joblib.load("final_pipeline.pkl")
     if "history" not in st.session_state: st.session_state.history = []
     if "last_result" not in st.session_state: st.session_state.last_result = None
