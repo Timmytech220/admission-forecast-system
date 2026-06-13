@@ -3,14 +3,22 @@ import pandas as pd
 import plotly.express as px
 import joblib
 
-# --- 1. CONFIG & CSS ---
+# --- 1. CONFIG & STYLING ---
 st.set_page_config(page_title="Timmytech Admission Forecast", layout="wide")
 st.markdown("""
     <style>
+    /* Global Sidebar Styling */
     section[data-testid="stSidebar"] { background-color: #1e3a8a !important; color: white !important; }
     section[data-testid="stSidebar"] * { color: white !important; }
-    .help-img { border-radius: 50%; width: 180px; height: 180px; border: 5px solid #3b82f6; object-fit: cover; }
-    .result-card { border: 1px solid #e0e0e0; padding: 20px; border-radius: 10px; background-color: #f9f9f9; }
+    
+    /* Login Card Style */
+    .login-box { padding: 30px; border-radius: 15px; background-color: #f0f4f8; border: 1px solid #d1d9e6; }
+    
+    /* Result Card */
+    .result-card { border: 1px solid #e0e0e0; padding: 20px; border-radius: 10px; background-color: #ffffff; box-shadow: 2px 2px 10px #f0f0f0; }
+    
+    /* Headers */
+    h1, h2 { color: #1e3a8a; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -21,7 +29,8 @@ if "logged_in" not in st.session_state:
 if not st.session_state.logged_in:
     c1, mid, c3 = st.columns([1, 2, 1])
     with mid:
-        st.markdown("<h2 style='text-align: center;'>🔐 Timmytech Access</h2>", unsafe_allow_html=True)
+        st.markdown("<div class='login-box'>", unsafe_allow_html=True)
+        st.title("🔐 Secure Portal Login")
         user = st.text_input("Username", placeholder="Enter your username")
         pwd = st.text_input("Password", type="password", placeholder="Enter your password")
         if st.button("Login", use_container_width=True):
@@ -30,6 +39,7 @@ if not st.session_state.logged_in:
                 st.rerun()
             else:
                 st.error("Invalid credentials!")
+        st.markdown("</div>", unsafe_allow_html=True)
     st.stop()
 
 # Load model
@@ -81,7 +91,7 @@ elif page == "Admission Forecast":
         if st.session_state.last_result:
             res = st.session_state.last_result
             st.success(f"FINAL DECISION: {res['status']}")
-            st.info(f"💡 **AI Suggestion:** Your score of {res['prob']:.1%} suggests focusing on { 'Interview' if res['intv'] < 60 else 'academic core subjects' }.")
+            st.info(f"🚀 **Insight Summary:** Your profile metrics suggest focusing on { 'your Interview skills' if res['intv'] < 60 else 'your core academic subjects' } to improve your chances.")
             st.markdown('<div class="result-card">', unsafe_allow_html=True)
             st.subheader("Visual Analysis")
             df_plot = pd.DataFrame({"Metric": ["JAMB", "WAEC", "INT"], "Score": [res['jamb']/4, res['waec'], res['intv']]})
@@ -115,3 +125,4 @@ elif page == "Help & Support":
     st.write("📞 **WhatsApp/Call:** 09168090334")
     st.write("📱 **Facebook:** facebook.com/Timmytech")
     st.write("🎵 **TikTok:** tiktok.com/@Timmytech")
+        
