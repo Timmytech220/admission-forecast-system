@@ -55,10 +55,16 @@ with st.sidebar:
     page = st.radio("MAIN NAVIGATION", ["Dashboard", "Admission Forecast", "History Log", "Export Reports", "Help & Support"])
     st.divider()
     st.write("Developed by: **Ajayi Oluwatimileyin Daniel**")
-
 # --- 5. PAGE LOGIC ---
-
-
+if page == "Dashboard":
+    st.title("Welcome to Timmytech Admission Forecast System")
+    st.image("https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2000", use_container_width=True)
+    if len(st.session_state.history) > 0:
+        df = pd.DataFrame(st.session_state.history)
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Total Forecasts", len(df))
+        c2.metric("Success Rate", f"{(len(df[df['status'].str.contains('QUALIFIED')])/len(df))*100:.1f}%")
+        c3.metric("Avg Probability", f"{df['prob'].mean()*100:.1f}%")
 
 elif page == "Admission Forecast":
     st.title("Admission Forecast Portal")
@@ -78,8 +84,7 @@ elif page == "Admission Forecast":
                 prob = float(pipeline.predict(input_data)[0])
                 status = f"{'QUALIFIED' if prob >= 0.5 else 'NOT QUALIFIED'} ({prob:.1%})"
                 
-                # --- DATABASE SAVE ACTION ---
-                # This saves the data to your Google Sheet automatically
+                # --- Database Save Action ---
                 save_data(name, status, f"{prob:.1%}", str(jamb), str(olevel), str(intv))
                 
                 st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv}
@@ -96,7 +101,6 @@ elif page == "Admission Forecast":
             fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
             st.plotly_chart(fig, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
-    
 
 elif page == "History Log":
     st.title("📋 Prediction History")
