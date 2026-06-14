@@ -165,6 +165,7 @@ elif page == "Admission Forecast":
         name = st.text_input("Full Name")
         jamb = st.slider("JAMB Score", 100, 400, 250)
         
+        # O-Level Inputs
         st.write("**Select your 5 core/required subjects:**")
         c_eng, c_mat = st.columns(2)
         with c_eng: eng = st.selectbox("English Language", ['None', 'A1', 'B2', 'B3', 'C4', 'C5', 'C6'])
@@ -184,23 +185,35 @@ elif page == "Admission Forecast":
         olevel = calculate_olevel_points([eng, mat, sub3_grade, sub4_grade, sub5_grade])
         intv = st.slider("Interview Score", 0, 100, 50)
         
-        # --- THE BUTTON IS NOW INTEGRATED HERE ---
+        # --- THE BUTTON IS NOW INTEGRATED & BULLETPROOF ---
         if st.button(translations[lang]["btn"], type="primary"):
+            # Validation Checks
             if not name.strip(): 
                 st.error("⚠️ Please enter a student name.")
+            elif "None" in [eng, mat, sub3_grade, sub4_grade, sub5_grade]:
+                st.error("⚠️ Please select valid grades for all 5 subjects.")
             else:
-                input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [olevel], "interview_score": [intv]})
-                prob = float(pipeline.predict(input_data)[0])
-                status_text = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
-                status = f"{status_text} ({prob:.1%})"
-                
-                save_data(name, status, f"{prob:.1%}", str(jamb), str(olevel), str(intv))
-                st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv}
-                st.session_state.history.append(st.session_state.last_result)
-                
-                st.success(f"{translations[lang]['success']}: {status}")
-                
+                try:
+                    # 1. Prediction Logic
+                    input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [olevel], "interview_score": [intv]})
+                    prob = float(pipeline.predict(input_data)[0])
+                    status_text = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
+                    status = f"{status_text} ({prob:.1%})"
+                    
+                    # 2. Database Save
+                    save_data(name, status, f"{prob:.1%}", str(jamb), str(olevel), str(intv))
+                    
+                    # 3. Session State
+                    st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv}
+                    st.session_state.history.append(st.session_state.last_result)
+                    
+                    st.success(f"{translations[lang]['success']}: {status}")
+                    
+                except Exception as e:
+                    st.error("⚠️ An error occurred during processing. Please check your internet or try again.")
+
     with col2:
+        # Results Display
         if "last_result" in st.session_state and st.session_state.last_result:
             res = st.session_state.last_result
             st.subheader(translations[lang]["roadmap"])
@@ -212,6 +225,7 @@ elif page == "Admission Forecast":
             df_plot = pd.DataFrame({"Metric": ["JAMB", "O-Level", "INT"], "Score": [res['jamb']/4, res['olevel'], res['intv']]})
             fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
             st.plotly_chart(fig, use_container_width=True)
+                     
 
 
 elif page == "Bulk Forecast":
