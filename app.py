@@ -3,22 +3,31 @@ import pandas as pd
 import plotly.express as px
 import joblib
 
-# --- LANGUAGES ---
-translations = {
-    "English": {
-        "nav_title": "MAIN NAVIGATION",
-        "title": "Admission Forecast Portal",
-        "btn": "Run Forecast Now",
-        "success": "FINAL DECISION",
-        "roadmap": "💡 Improvement Roadmap"
-    },
-    "Hausa": {
-        "nav_title": "BABBAN JERE",
-        "title": "Tashar Hasashen Shiga Makaranta",
-        "btn": "Fara Hasashen Yanzu",
-        "success": "SAKO NA KARSHE",
-        "roadmap": "💡 Hanyar Ingantawa"
+st.markdown("""
+    <style>
+    /* Premium Styling for Selectbox and UI elements */
+    .stSelectbox div[data-baseweb="select"] {
+        background-color: #f8f9fa !important;
+        border-radius: 8px !important;
+        border: 1px solid #ced4da !important;
     }
+    /* Enhancing the sidebar contrast */
+    [data-testid="stSidebar"] {
+        background-color: #0e1117;
+        color: white;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+
+# --- LANGUAGES ---
+
+translations = {
+    "English": {"nav_title": "MAIN NAVIGATION", "title": "Admission Forecast Portal", "btn": "Run Forecast Now", "success": "FINAL DECISION", "roadmap": "💡 Improvement Roadmap"},
+    "Hausa": {"nav_title": "BABBAN JERE", "title": "Tashar Hasashen Shiga Makaranta", "btn": "Fara Hasashen Yanzu", "success": "SAKO NA KARSHE", "roadmap": "💡 Hanyar Ingantawa"},
+    "French": {"nav_title": "NAVIGATION PRINCIPALE", "title": "Portail de prévision d'admission", "btn": "Lancer la prévision", "success": "DÉCISION FINALE", "roadmap": "💡 Feuille de route"},
+    "Yoruba": {"nav_title": "AWON ILE-ISE", "title": "Ile-ise Isiro Gbigba-si-Ile-Iwe", "btn": "Bere Isiro Isiro", "success": "IPARI ERO", "roadmap": "💡 Ona lati se atunse"},
+    "Igbo": {"nav_title": "NKE N'IHU", "title": "Portal Amụma Nnabata", "btn": "Malite Amụma Ugbu a", "success": "MKPEBI IKPEAZỤ", "roadmap": "💡 Ụzọ mmezi"}
 }
 
 
