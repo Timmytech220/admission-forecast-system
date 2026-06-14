@@ -185,20 +185,36 @@ elif page == "Admission Forecast":
         
         intv = st.slider("Interview Score", 0, 100, 50)
         
-        if st.button("Run Forecast Now", type="primary"):
-            if not name.strip(): 
-                st.error("⚠️ Please enter a student name.")
-            else:
-                input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [olevel], "interview_score": [intv]})
-                prob = float(pipeline.predict(input_data)[0])
-                status = f"{'QUALIFIED' if prob >= 0.5 else 'NOT QUALIFIED'} ({prob:.1%})"
-                
-                # --- Database Save Action ---
-                save_data(name, status, f"{prob:.1%}", str(jamb), str(olevel), str(intv))
-                
-                st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv}
-                st.session_state.history.append(st.session_state.last_result)
-                st.success("Result saved to database!")
+
+
+        # --- 5. PAGE LOGIC: Admission Forecast ---
+elif page == "Admission Forecast":
+    st.title(translations[lang]["title"]) # Using dynamic title
+    
+    # ... (Keep your input sliders and logic exactly as they are) ...
+    
+    # Updated Button and Results
+    if st.button(translations[lang]["btn"], type="primary"): # Dynamic button text
+        if not name.strip(): 
+            st.error("⚠️ Please enter a student name.")
+        else:
+            input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [olevel], "interview_score": [intv]})
+            prob = float(pipeline.predict(input_data)[0])
+            
+            # Use dynamic status label
+            status_text = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
+            status = f"{status_text} ({prob:.1%})"
+            
+            # --- Database Save Action ---
+            save_data(name, status, f"{prob:.1%}", str(jamb), str(olevel), str(intv))
+            
+            st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv}
+            st.session_state.history.append(st.session_state.last_result)
+            
+            # Dynamic Success Message
+            st.success(f"{translations[lang]['success']}: {status}")
+            st.subheader(translations[lang]["roadmap"])
+            
 
         with col2:
             if st.session_state.last_result:
