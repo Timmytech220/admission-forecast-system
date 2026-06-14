@@ -2,7 +2,12 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import joblib
-
+# --- Put this right after your imports ---
+def calculate_olevel_points(grades):
+    grade_map = {'A1': 6, 'B2': 5, 'B3': 4, 'C4': 3, 'C5': 2, 'C6': 1, 'None': 0}
+    points = sum([grade_map.get(grade, 0) for grade in grades])
+    return points
+    
 
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
@@ -75,6 +80,8 @@ with st.sidebar:
     page = st.radio("MAIN NAVIGATION", ["Dashboard", "Admission Forecast", "History Log", "Export Reports", "Help & Support"])
     st.divider()
     st.write("Developed by: **Ajayi Oluwatimileyin Daniel**")
+
+
 # --- 5. PAGE LOGIC ---
 if page == "Dashboard":
     st.title("Welcome to Timmytech Admission Forecast System")
@@ -89,11 +96,27 @@ if page == "Dashboard":
 elif page == "Admission Forecast":
     st.title("Admission Forecast Portal")
     col1, col2 = st.columns([1, 1])
+    
     with col1:
         st.subheader("Student Profile Inputs")
         name = st.text_input("Full Name")
         jamb = st.slider("JAMB Score", 100, 400, 250)
-        olevel = st.slider("O-Level Points", 0, 100, 50)
+        
+        # --- NEW O-LEVEL INPUT SECTION ---
+        st.write("**Select grades for 5 core subjects:**")
+        g1, g2, g3, g4, g5 = st.columns(5)
+        options = ['None', 'A1', 'B2', 'B3', 'C4', 'C5', 'C6']
+        
+        with g1: v1 = st.selectbox("S1", options)
+        with g2: v2 = st.selectbox("S2", options)
+        with g3: v3 = st.selectbox("S3", options)
+        with g4: v4 = st.selectbox("S4", options)
+        with g5: v5 = st.selectbox("S5", options)
+        
+        olevel = calculate_olevel_points([v1, v2, v3, v4, v5])
+        st.info(f"O-Level Points: {olevel}")
+        # ---------------------------------
+        
         intv = st.slider("Interview Score", 0, 100, 50)
         
         if st.button("Run Forecast Now", type="primary"):
@@ -121,6 +144,7 @@ elif page == "Admission Forecast":
             fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
             st.plotly_chart(fig, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
+            
 
 elif page == "History Log":
     st.title("📋 Prediction History")
