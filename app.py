@@ -297,9 +297,37 @@ elif page == "History Log":
 
 elif page == "Export Reports":
     st.title("🖨️ Export Official Reports")
-    for i, s in enumerate(st.session_state.history):
-        txt = f"TIMMYTECH REPORT\nName: {s['name']}\nDecision: {s['status']}"
-        st.download_button(f"Download: {s['name']}", txt, file_name=f"{s['name']}_report.txt")
+    
+    if not st.session_state.history:
+        st.info("No records found in history to export.")
+    else:
+        st.write("Click below to download individual student reports:")
+        
+        # We loop through history and give each button a unique key based on its index
+        for i, s in enumerate(st.session_state.history):
+            with st.container():
+                st.markdown(f'<div class="report-card">', unsafe_allow_html=True)
+                st.write(f"**Student:** {s['name']} | **Status:** {s['status']}")
+                
+                report_txt = f"""
+                --- TIMMYTECH ADMISSION REPORT ---
+                Name: {s['name']}
+                Final Decision: {s['status']}
+                JAMB Score: {s['jamb']}
+                O-Level Points: {s['olevel']}
+                Interview Score: {s['intv']}
+                ----------------------------------
+                """
+                
+                st.download_button(
+                    label=f"📥 Download {s['name']}'s Report",
+                    data=report_txt,
+                    file_name=f"{s['name']}_report.txt",
+                    mime="text/plain",
+                    key=f"dl_btn_{i}" # THE UNIQUE KEY FIXES THE ERROR
+                )
+                st.markdown('</div>', unsafe_allow_html=True)
+        
 
 elif page == "Help & Support":
     st.title("💬 Help & Support Center")
