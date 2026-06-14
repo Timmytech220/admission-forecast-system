@@ -19,6 +19,16 @@ def calculate_olevel_points(grades):
     grade_map = {'A1': 6, 'B2': 5, 'B3': 4, 'C4': 3, 'C5': 2, 'C6': 1, 'None': 0}
     points = sum([grade_map.get(grade, 0) for grade in grades])
     return points
+
+def get_roadmap(jamb, olevel_points):
+    tips = []
+    if jamb < 250:
+        tips.append("📈 **JAMB:** Aim for 250+ to increase your selection probability.")
+    if olevel_points < 20:
+        tips.append("📚 **O-Level:** Your point total is low. Consider retaking core subjects.")
+    if not tips:
+        tips.append("🌟 **Great profile!** Keep maintaining your current performance.")
+    return tips
     
 
 import gspread
@@ -160,18 +170,28 @@ elif page == "Admission Forecast":
                 st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv}
                 st.session_state.history.append(st.session_state.last_result)
                 st.success("Result saved to database!")
-    
-    with col2:
-        if st.session_state.last_result:
-            res = st.session_state.last_result
-            st.success(f"FINAL DECISION: {res['status']}")
-            st.info(f"🚀 **Insight Summary:** Your profile metrics suggest focusing on { 'your Interview skills' if res['intv'] < 60 else 'your core academic subjects' }.")
-            st.markdown('<div class="result-card">', unsafe_allow_html=True)
-            df_plot = pd.DataFrame({"Metric": ["JAMB", "O-Level", "INT"], "Score": [res['jamb']/4, res['olevel'], res['intv']]})
-            fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
-            st.plotly_chart(fig, use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
 
+        with col2:
+            if st.session_state.last_result:
+                res = st.session_state.last_result
+                st.success(f"FINAL DECISION: {res['status']}")
+                
+                # Insight Summary
+                st.info(f"🚀 **Insight Summary:** Your profile metrics suggest focusing on { 'your Interview skills' if res['intv'] < 60 else 'your core academic subjects' }.")
+                
+                # Roadmap Section
+                st.subheader("💡 Improvement Roadmap")
+                tips = get_roadmap(res['jamb'], res['olevel'])
+                for tip in tips:
+                    st.info(tip)
+                
+                # Bar Chart
+                st.markdown('<div class="result-card">', unsafe_allow_html=True)
+                df_plot = pd.DataFrame({"Metric": ["JAMB", "O-Level", "INT"], "Score": [res['jamb']/4, res['olevel'], res['intv']]})
+                fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
+                st.plotly_chart(fig, use_container_width=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+                
             
 
 elif page == "History Log":
