@@ -143,7 +143,6 @@ with st.sidebar:
     
 
 
-
 # --- 5. PAGE LOGIC ---
 if page == "Dashboard":
     st.title("Welcome to Timmytech Admission Forecast System")
