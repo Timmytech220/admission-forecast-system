@@ -4,7 +4,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 ALL_SUBJECTS = ['None', 'Biology', 'Chemistry', 'Physics', 'Accounting', 'Economics', 
                 'Government', 'CRS/IRS', 'Literature-in-English', 'Agricultural Science', 
-                'Commerce', 'Geography', 'History', 'Further Mathematics', 'Computer Science',
+                'Commerce', 'Geography', 'History', 'Further Mathematics', 'Computer Science', 
                 'Islamic Studies', 'Yoruba', 'Igbo', 'Hausa', 'Civic Education', 
                 'Technical Drawing', 'Physical Education', 'Food and Nutrition', 
                 'Visual Art', 'Music', 'French']
@@ -15,9 +15,10 @@ def calculate_olevel_points(grades):
 
 def save_data(name, status, prob, jamb, olevel, intv):
     scope = ["https://www.googleapis.com/auth/spreadsheets"]
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(dict(st.secrets["gcp_service_account"]), scope)
+    # Ensure GCP credentials are set in Streamlit secrets
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["gcp_service_account"], scope)
     client = gspread.authorize(creds)
-    spreadsheet = client.open_by_key("1mmG9VbogSnTLmLwWpOmVa3L1CWCCf5EcZmvJCAGCUp4")
-    sheet = spreadsheet.get_worksheet(0) 
+    spreadsheet = client.open_by_key('1m69VbogSnTLwWp0Wa3L1CHCCfSEc2nvJCA6OUp4')
+    sheet = spreadsheet.get_worksheet(0)
     sheet.append_row([name, status, prob, jamb, olevel, intv])
-                 
+  
