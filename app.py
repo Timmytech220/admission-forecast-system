@@ -9,19 +9,21 @@ from oauth2client.service_account import ServiceAccountCredentials
 import streamlit as st
 
 
-def save_data(name, status, prob, jamb, olevel, intv):
+
+    def save_data(name, status, prob, jamb, olevel, intv):
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets']
     creds = ServiceAccountCredentials.from_json_keyfile_dict(dict(st.secrets["gcp_service_account"]), scope)
     client = gspread.authorize(creds)
     
-    # Open the sheet
-    spreadsheet = client.open("Admission forecast system")
-    # This will use the first worksheet available, regardless of its name
+    # Use the unique ID from your sheet's URL
+    spreadsheet = client.open_by_key("1mmG9VbogSnTLmLwWpOmVa3L1CWCCf5EcZmvJCAGCUp4")
+    
+    # This grabs the first tab in your sheet
     sheet = spreadsheet.get_worksheet(0) 
     
-    # Append the row
+    # This appends the data
     sheet.append_row([name, status, prob, jamb, olevel, intv])
-    
+        
 
 
 # --- 1. CONFIG & STYLING ---
