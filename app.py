@@ -5,38 +5,34 @@ import joblib
 
 st.markdown("""
     <style>
-    /* Modern Card Style */
+    /* Global Styles */
     .stApp { background-color: #f8f9fa; }
-    div[data-testid="stMetricValue"] { font-size: 24px; color: #1e3a8a; }
-    div[data-testid="stExpander"] { border: 1px solid #e2e8f0; border-radius: 10px; }
     
-    /* Custom Button Style */
-    div.stButton > button {
-        background-color: #1e3a8a;
-        color: white;
-        border-radius: 8px;
-        font-weight: bold;
+    /* Button Styling */
+    div.stButton > button { 
+        background-color: #1e3a8a; 
+        color: white; 
+        border-radius: 8px; 
+        font-weight: bold; 
+    }
+    
+    /* Premium Report Card Style */
+    .report-card { 
+        background: white; 
+        padding: 15px; 
+        border-radius: 10px; 
+        border: 1px solid #e2e8f0; 
+        margin-bottom: 15px;
+        box-shadow: 2px 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    /* Sidebar Styling */
+    [data-testid="stSidebar"] { 
+        background-color: #0e1117; 
+        color: white; 
     }
     </style>
 """, unsafe_allow_html=True)
-
-
-
-st.markdown("""
-    <style>
-    /* Premium Styling for Selectbox and UI elements */
-    .stSelectbox div[data-baseweb="select"] {
-        background-color: #f8f9fa !important;
-        border-radius: 8px !important;
-        border: 1px solid #ced4da !important;
-    }
-    /* Enhancing the sidebar contrast */
-    [data-testid="stSidebar"] {
-        background-color: #0e1117;
-        color: white;
-    }
-    </style>
-    """, unsafe_allow_html=True)
 
 
 
