@@ -3,6 +3,13 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import joblib
+
+
+import streamlit as st
+from utils import * # Import your functions here
+if "logged_in" not in st.session_state or not st.session_state.logged_in:
+    st.switch_page("app.py")
+    
 from app import ALL_SUBJECTS, calculate_olevel_points, save_data
 
 # Load your model
