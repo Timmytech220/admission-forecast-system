@@ -231,6 +231,7 @@ elif page == "Admission Forecast":
         
 
         # --- THE BUTTON IS NOW INTEGRATED, POLISHED & PLAYFUL ---
+
         if st.button(translations[lang]["btn"], type="primary"):
             # Validation Checks
             if not name.strip(): 
@@ -254,29 +255,34 @@ elif page == "Admission Forecast":
                         st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv}
                         st.session_state.history.append(st.session_state.last_result)
                         
-                        # 6. Playful Success Feedback & Card Generation
-                        if prob >= 0.5:
-                            st.toast('🎉 Amazing! Your profile looks like a winner!', icon='✨')
-                            st.success(f"Success! {status}")
-                            
-                            # Generate and offer the card
-                            card_path = create_shareable_card(name, status)
-                            with open(card_path, "rb") as file:
-                                st.download_button(
-                                    label="📸 Download Result Card to share!",
-                                    data=file,
-                                    file_name="my_admission_result.png",
-                                    mime="image/png"
-                                )
-                        else:
-                            st.toast('Keep pushing! Your roadmap shows you have potential!', icon='💪')
-                            st.warning(f"Result: {status}")
+                        # Success Logic handled outside/after spinner completes for better UI flow
                         
                     except Exception as e:
                         st.error("⚠️ Oops! A little glitch in the matrix. Check your internet and try again!")
+                        st.session_state.last_result = None # Reset on error
+
+                # Result display block - rendered after the spinner finishes
+                if "last_result" in st.session_state and st.session_state.last_result:
+                    res = st.session_state.last_result
+                    if res['prob'] >= 0.5:
+                        st.toast('🎉 Amazing! Your profile looks like a winner!', icon='✨')
+                        st.success(f"Success! {res['status']}")
+                        
+                        # Generate and offer the card
+                        card_path = create_shareable_card(res['name'], res['status'])
+                        with open(card_path, "rb") as file:
+                            st.download_button(
+                                label="📸 Download Result Card to share!",
+                                data=file,
+                                file_name="my_admission_result.png",
+                                mime="image/png"
+                            )
+                    else:
+                        st.toast('Keep pushing! Your roadmap shows you have potential!', icon='💪')
+                        st.warning(f"Result: {res['status']}")
 
     with col2:
-        # Results Display
+        # Results Display for the Roadmap
         if "last_result" in st.session_state and st.session_state.last_result:
             res = st.session_state.last_result
             st.subheader(translations[lang]["roadmap"])
@@ -285,11 +291,11 @@ elif page == "Admission Forecast":
                 st.info(tip)
             st.info(f"🚀 **Insight Summary:** Focus on {'Interview skills' if res['intv'] < 60 else 'academic subjects'}.")
             
+            # Using use_container_width=True for responsiveness
             df_plot = pd.DataFrame({"Metric": ["JAMB", "O-Level", "INT"], "Score": [res['jamb']/4, res['olevel'], res['intv']]})
             fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
             st.plotly_chart(fig, use_container_width=True)
         
-
 elif page == "Bulk Forecast":
     st.title("📂 Bulk Applicant Processing")
     st.write("Upload a CSV file containing columns: `jamb_score`, `olevel_points`, `interview_score`.")
