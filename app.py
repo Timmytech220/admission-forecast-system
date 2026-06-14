@@ -3,6 +3,24 @@ import pandas as pd
 import plotly.express as px
 import joblib
 
+# --- LANGUAGES ---
+translations = {
+    "English": {
+        "nav_title": "MAIN NAVIGATION",
+        "title": "Admission Forecast Portal",
+        "btn": "Run Forecast Now",
+        "success": "FINAL DECISION",
+        "roadmap": "💡 Improvement Roadmap"
+    },
+    "Hausa": {
+        "nav_title": "BABBAN JERE",
+        "title": "Tashar Hasashen Shiga Makaranta",
+        "btn": "Fara Hasashen Yanzu",
+        "success": "SAKO NA KARSHE",
+        "roadmap": "💡 Hanyar Ingantawa"
+    }
+}
+
 
 ALL_SUBJECTS = [
     'None', 'Biology', 'Chemistry', 'Physics', 'Accounting', 'Economics', 
@@ -100,11 +118,20 @@ if "last_result" not in st.session_state: st.session_state.last_result = None
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2942/2942813.png", width=80) 
     st.markdown("## Timmytech Console")
-    # Added "Bulk Forecast" here
-    page = st.radio("MAIN NAVIGATION", ["Dashboard", "Admission Forecast", "Bulk Forecast", "History Log", "Export Reports", "Help & Support"])
+    
+    # Language Picker
+    lang = st.selectbox("🌍 Select Language", ["English", "Hausa"])
+    
+    # Dynamic navigation based on selected language
+    page = st.radio(
+        translations[lang]["nav_title"], 
+        ["Dashboard", "Admission Forecast", "Bulk Forecast", "History Log", "Export Reports", "Help & Support"]
+    )
+    
     st.divider()
     st.write("Developed by: **Ajayi Oluwatimileyin Daniel**")
-    
+
+
 
 # --- 5. PAGE LOGIC ---
 if page == "Dashboard":
