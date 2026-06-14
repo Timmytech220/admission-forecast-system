@@ -1,15 +1,11 @@
 import streamlit as st
-import pandas as pd
+import sys
+import os
 
-import streamlit as st
-from utils import * # Import your functions here
+# 1. Path Fix: This allows the page to "see" your utils.py file
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+# 2. Security Gate: If not logged in, force them back to the login page
 if "logged_in" not in st.session_state or not st.session_state.logged_in:
     st.switch_page("app.py")
-
-
-st.title("📋 Prediction History")
-if len(st.session_state.history) > 0:
-    st.dataframe(pd.DataFrame(st.session_state.history), use_container_width=True)
-else:
-    st.info("No records found.")
-  
+    
