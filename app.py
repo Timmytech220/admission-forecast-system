@@ -11,14 +11,17 @@ import streamlit as st
 
 def save_data(name, status, prob, jamb, olevel, intv):
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets']
-    # This reads the secret you just saved in the dashboard
     creds = ServiceAccountCredentials.from_json_keyfile_dict(dict(st.secrets["gcp_service_account"]), scope)
     client = gspread.authorize(creds)
     
-    # Open the sheet by its name (Make sure it is exactly: Admission_Forecast_Data)
-    sheet = client.open("Admission forecast system").sheet1
+    # Open the sheet
+    spreadsheet = client.open("Admission forecast system")
+    # This will use the first worksheet available, regardless of its name
+    sheet = spreadsheet.get_worksheet(0) 
     
+    # Append the row
     sheet.append_row([name, status, prob, jamb, olevel, intv])
+    
 
 
 # --- 1. CONFIG & STYLING ---
