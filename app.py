@@ -296,9 +296,11 @@ elif page == "Admission Forecast":
             
             # Using use_container_width=True for responsiveness
             df_plot = pd.DataFrame({"Metric": ["JAMB", "O-Level", "INT"], "Score": [res['jamb']/4, res['olevel'], res['intv']]})
-            fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
+            fig = px.bar(df_plot, x="Metric", y="Score", color="Sco tore", color_continuous_scale="Blues")
             st.plotly_chart(fig, use_container_width=True)
-        
+
+
+
 elif page == "Bulk Forecast":
     st.title("📂 Bulk Applicant Processing")
     st.write("Upload a CSV file containing columns: `jamb_score`, `olevel_points`, `interview_score`.")
