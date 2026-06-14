@@ -16,7 +16,8 @@ def save_data(name, status, prob, jamb, olevel, intv):
     client = gspread.authorize(creds)
     
     # Open the sheet by its name (Make sure it is exactly: Admission_Forecast_Data)
-    sheet = client.open("Admission_Forecast_Data").sheet1
+    sheet = client.open("Admission forecast system").sheet1
+    
     sheet.append_row([name, status, prob, jamb, olevel, intv])
 
 
