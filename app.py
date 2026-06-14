@@ -274,23 +274,7 @@ elif page == "Admission Forecast":
                         
                         # Success Logic handled outside/after spinner completes for better UI flow
                         
-                    except Exception as e:
-                        st.error("⚠️ Oops! A little glitch in the matrix. Check your internet and try again!")
-                        st.session_state.last_result = None # Reset on error
-
-                # Result display block - rendered after the spinner finishes
-                if "last_result" in st.session_state and st.session_state.last_result:
-                    res = st.session_state.last_result
-                    if res['prob'] >= 0.5:
-                        st.toast('🎉 Amazing! Your profile looks like a winner!', icon='✨')
-                        st.success(f"Success! {res['status']}")
-
-
-            
-                        # Generate and offer the card
-                        card_path = create_shareable_card(res['name'], res['status'])
-                        with open(card_path, "rb") as file:
-                            st.download_button(
+                    
                                 label="📸 Download Result Card to share!",
                                 data=file,
                                 file_name="my_admission_result.png",
