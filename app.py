@@ -232,28 +232,49 @@ elif page == "Admission Forecast":
 
         # --- THE BUTTON IS NOW INTEGRATED, POLISHED & PLAYFUL ---
 
-        if st.button(translations[lang]["btn"], type="primary"):
+                if st.button(translations[lang]["btn"], type="primary"):
             # Validation Checks
             if not name.strip(): 
                 st.error("⚠️ Oops! Don't forget to enter your name, superstar!")
             elif "None" in [eng, mat, sub3_grade, sub4_grade, sub5_grade]:
                 st.error("⚠️ Hold on! Make sure you select grades for all 5 subjects.")
             else:
-                # 2. Show a spinner while the magic happens
                 with st.spinner('Analyzing your profile, hang tight... 🚀'):
                     try:
-                        # 3. Prediction Logic
+                        # Prediction Logic
                         input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [olevel], "interview_score": [intv]})
                         prob = float(pipeline.predict(input_data)[0])
                         status_text = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
                         status = f"{status_text} ({prob:.1%})"
                         
-                        # 4. Database Save
+                        # Database Save
                         save_data(name, status, f"{prob:.1%}", str(jamb), str(olevel), str(intv))
                         
-                        # 5. Session State
+                        # Update Session State
                         st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv}
                         st.session_state.history.append(st.session_state.last_result)
+                        
+                        # Trigger Rerun to show updated UI without errors
+                        st.rerun() 
+                        
+                    except Exception as e:
+                        st.error(f"⚠️ A glitch occurred: {e}")
+                        st.session_state.last_result = None
+
+        # Display result logic separately to avoid NameErrors during re-runs
+        if "last_result" in st.session_state and st.session_state.last_result:
+            res = st.session_state.last_result
+            if res['prob'] >= 0.5:
+                st.success(f"Success! {res['status']}")
+                # Check if function exists before calling to prevent the NameError
+                if 'create_shareable_card' in globals():
+                    card_path = create_shareable_card(res['name'], res['status'])
+                    if card_path and os.path.exists(card_path):
+                        with open(card_path, "rb") as file:
+                            st.download_button("📸 Download Result Card", data=file, file_name="result.png", mime="image/png")
+            else:
+                st.warning(f"Result: {res['status']}")
+
                         
                         # Success Logic handled outside/after spinner completes for better UI flow
                         
@@ -267,7 +288,9 @@ elif page == "Admission Forecast":
                     if res['prob'] >= 0.5:
                         st.toast('🎉 Amazing! Your profile looks like a winner!', icon='✨')
                         st.success(f"Success! {res['status']}")
-                        
+
+
+            
                         # Generate and offer the card
                         card_path = create_shareable_card(res['name'], res['status'])
                         with open(card_path, "rb") as file:
