@@ -197,12 +197,11 @@ elif page == "Admission Forecast":
         intv = st.slider("Interview Score", 0, 100, 50)
         
 
- elif page == "Admission Forecast":
+elif page == "Admission Forecast":
     st.title(translations[lang]["title"])
     
-    # ... (Your input sliders and name variable must be defined here) ...
-
-    # The Button Block
+    # Ensure your sliders/inputs (name, jamb, olevel, intv) are defined above this block
+    
     if st.button(translations[lang]["btn"], type="primary"):
         if not name.strip(): 
             st.error("⚠️ Please enter a student name.")
@@ -220,7 +219,7 @@ elif page == "Admission Forecast":
             st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv}
             st.session_state.history.append(st.session_state.last_result)
             
-            # 4. Display Results (Everything is now indented INSIDE this else block)
+            # 4. Display Results
             st.success(f"{translations[lang]['success']}: {status}")
             
             col1, col2 = st.columns(2)
@@ -238,8 +237,7 @@ elif page == "Admission Forecast":
                 df_plot = pd.DataFrame({"Metric": ["JAMB", "O-Level", "INT"], "Score": [res['jamb']/4, res['olevel'], res['intv']]})
                 fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
                 st.plotly_chart(fig, use_container_width=True)
-        
-
+                                                       
 
 elif page == "Bulk Forecast":
     st.title("📂 Bulk Applicant Processing")
