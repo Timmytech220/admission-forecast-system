@@ -144,6 +144,7 @@ with st.sidebar:
     
 
 
+
 # --- 5. PAGE LOGIC ---
 if page == "Dashboard":
     st.title("Welcome to Timmytech Admission Forecast System")
@@ -156,7 +157,7 @@ if page == "Dashboard":
         c3.metric("Avg Probability", f"{df['prob'].mean()*100:.1f}%")
 
 elif page == "Admission Forecast":
-    st.title("Admission Forecast Portal")
+    st.title(translations[lang]["title"])
     col1, col2 = st.columns([1, 1])
     
     with col1:
@@ -164,15 +165,11 @@ elif page == "Admission Forecast":
         name = st.text_input("Full Name")
         jamb = st.slider("JAMB Score", 100, 400, 250)
         
-        # --- DYNAMIC O-LEVEL INPUT SECTION ---
         st.write("**Select your 5 core/required subjects:**")
-        
-        # English and Maths are constants
         c_eng, c_mat = st.columns(2)
         with c_eng: eng = st.selectbox("English Language", ['None', 'A1', 'B2', 'B3', 'C4', 'C5', 'C6'])
         with c_mat: mat = st.selectbox("Mathematics", ['None', 'A1', 'B2', 'B3', 'C4', 'C5', 'C6'])
         
-        # Other 3 subjects from your ALL_SUBJECTS list
         c3, c4, c5 = st.columns(3)
         with c3: 
             sub3_name = st.selectbox("Subject 3", ALL_SUBJECTS)
@@ -184,60 +181,38 @@ elif page == "Admission Forecast":
             sub5_name = st.selectbox("Subject 5", ALL_SUBJECTS)
             sub5_grade = st.selectbox("Grade 5", ['None', 'A1', 'B2', 'B3', 'C4', 'C5', 'C6'])
         
-        # Calculate points using the function at the top
         olevel = calculate_olevel_points([eng, mat, sub3_grade, sub4_grade, sub5_grade])
-        
-        st.write("---")
-        # --- VERIFICATION DISPLAY ---
-        st.write(f"**Verification:** English ({eng}), Math ({mat})")
-        st.write(f"**Others:** {sub3_name} ({sub3_grade}), {sub4_name} ({sub4_grade}), {sub5_name} ({sub5_grade})")
-        st.success(f"Total O-Level Points: {olevel}")
-        # ----------------------------
-        
         intv = st.slider("Interview Score", 0, 100, 50)
         
-
-elif page == "Admission Forecast":
-    st.title(translations[lang]["title"])
-    
-    # Ensure your sliders/inputs (name, jamb, olevel, intv) are defined above this block
-    
-    if st.button(translations[lang]["btn"], type="primary"):
-        if not name.strip(): 
-            st.error("⚠️ Please enter a student name.")
-        else:
-            # 1. Prediction Logic
-            input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [olevel], "interview_score": [intv]})
-            prob = float(pipeline.predict(input_data)[0])
-            status_text = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
-            status = f"{status_text} ({prob:.1%})"
-            
-            # 2. Database Save
-            save_data(name, status, f"{prob:.1%}", str(jamb), str(olevel), str(intv))
-            
-            # 3. Session State
-            st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv}
-            st.session_state.history.append(st.session_state.last_result)
-            
-            # 4. Display Results
-            st.success(f"{translations[lang]['success']}: {status}")
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                st.subheader(translations[lang]["roadmap"])
-                tips = get_roadmap(jamb, olevel)
-                for tip in tips:
-                    st.info(tip)
-            
-            with col2:
-                res = st.session_state.last_result
-                st.info(f"🚀 **Insight Summary:** Your profile metrics suggest focusing on { 'your Interview skills' if res['intv'] < 60 else 'your core academic subjects' }.")
+        # --- THE BUTTON IS NOW INTEGRATED HERE ---
+        if st.button(translations[lang]["btn"], type="primary"):
+            if not name.strip(): 
+                st.error("⚠️ Please enter a student name.")
+            else:
+                input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [olevel], "interview_score": [intv]})
+                prob = float(pipeline.predict(input_data)[0])
+                status_text = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
+                status = f"{status_text} ({prob:.1%})"
                 
-                # Bar Chart
-                df_plot = pd.DataFrame({"Metric": ["JAMB", "O-Level", "INT"], "Score": [res['jamb']/4, res['olevel'], res['intv']]})
-                fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
-                st.plotly_chart(fig, use_container_width=True)
-                                                       
+                save_data(name, status, f"{prob:.1%}", str(jamb), str(olevel), str(intv))
+                st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv}
+                st.session_state.history.append(st.session_state.last_result)
+                
+                st.success(f"{translations[lang]['success']}: {status}")
+                
+    with col2:
+        if "last_result" in st.session_state and st.session_state.last_result:
+            res = st.session_state.last_result
+            st.subheader(translations[lang]["roadmap"])
+            tips = get_roadmap(res['jamb'], res['olevel'])
+            for tip in tips:
+                st.info(tip)
+            st.info(f"🚀 **Insight Summary:** Focus on {'Interview skills' if res['intv'] < 60 else 'academic subjects'}.")
+            
+            df_plot = pd.DataFrame({"Metric": ["JAMB", "O-Level", "INT"], "Score": [res['jamb']/4, res['olevel'], res['intv']]})
+            fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
+            st.plotly_chart(fig, use_container_width=True)
+
 
 elif page == "Bulk Forecast":
     st.title("📂 Bulk Applicant Processing")
