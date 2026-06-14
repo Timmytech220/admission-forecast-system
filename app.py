@@ -3,12 +3,13 @@ import pandas as pd
 import plotly.express as px
 import joblib
 
+
 st.markdown("""
     <style>
     /* Global Styles */
     .stApp { background-color: #f8f9fa; }
     
-    /* Button Styling */
+    /* Button Styling (Premium Blue) */
     div.stButton > button { 
         background-color: #1e3a8a; 
         color: white; 
@@ -33,7 +34,6 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-
 
 
 # --- LANGUAGES ---
