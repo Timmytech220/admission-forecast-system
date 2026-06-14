@@ -114,12 +114,6 @@ elif page == "Admission Forecast":
         name = st.text_input("Full Name")
         jamb = st.slider("JAMB Score", 100, 400, 250)
         
-        # --- NEW O-LEVEL INPUT SECTION ---
-            with col1:
-        st.subheader("Student Profile Inputs")
-        name = st.text_input("Full Name")
-        jamb = st.slider("JAMB Score", 100, 400, 250)
-        
         # --- DYNAMIC O-LEVEL INPUT SECTION ---
         st.write("**Select your 5 core/required subjects:**")
         
@@ -144,16 +138,13 @@ elif page == "Admission Forecast":
         olevel = calculate_olevel_points([eng, mat, sub3_grade, sub4_grade, sub5_grade])
         
         st.write("---")
-        st.write(f"**Verification:** Eng, Math, {sub3_name}, {sub4_name}, {sub5_name}")
+        # --- VERIFICATION DISPLAY ---
+        st.write(f"**Verification:** English ({eng}), Math ({mat})")
+        st.write(f"**Others:** {sub3_name} ({sub3_grade}), {sub4_name} ({sub4_grade}), {sub5_name} ({sub5_grade})")
         st.success(f"Total O-Level Points: {olevel}")
-        # -------------------------------------
+        # ----------------------------
         
         intv = st.slider("Interview Score", 0, 100, 50)
-        
-        # ... (rest of your existing "Run Forecast" button logic) ...
-        
-        
-        
         
         if st.button("Run Forecast Now", type="primary"):
             if not name.strip(): 
@@ -180,6 +171,7 @@ elif page == "Admission Forecast":
             fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
             st.plotly_chart(fig, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
+
             
 
 elif page == "History Log":
