@@ -197,56 +197,48 @@ elif page == "Admission Forecast":
         intv = st.slider("Interview Score", 0, 100, 50)
         
 
+ elif page == "Admission Forecast":
+    st.title(translations[lang]["title"])
+    
+    # ... (Your input sliders and name variable must be defined here) ...
 
-        # --- 5. PAGE LOGIC: Admission Forecast ---
-elif page == "Admission Forecast":
-    st.title(translations[lang]["title"]) # Using dynamic title
-    
-    # ... (Keep your input sliders and logic exactly as they are) ...
-    
-    # Updated Button and Results
-    if st.button(translations[lang]["btn"], type="primary"): # Dynamic button text
+    # The Button Block
+    if st.button(translations[lang]["btn"], type="primary"):
         if not name.strip(): 
             st.error("⚠️ Please enter a student name.")
         else:
+            # 1. Prediction Logic
             input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [olevel], "interview_score": [intv]})
             prob = float(pipeline.predict(input_data)[0])
-            
-            # Use dynamic status label
             status_text = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
             status = f"{status_text} ({prob:.1%})"
             
-            # --- Database Save Action ---
+            # 2. Database Save
             save_data(name, status, f"{prob:.1%}", str(jamb), str(olevel), str(intv))
             
+            # 3. Session State
             st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv}
             st.session_state.history.append(st.session_state.last_result)
             
-            # Dynamic Success Message
+            # 4. Display Results (Everything is now indented INSIDE this else block)
             st.success(f"{translations[lang]['success']}: {status}")
-            st.subheader(translations[lang]["roadmap"])
             
-
-        with col2:
-            if st.session_state.last_result:
-                res = st.session_state.last_result
-                st.success(f"FINAL DECISION: {res['status']}")
-                
-                # Insight Summary
-                st.info(f"🚀 **Insight Summary:** Your profile metrics suggest focusing on { 'your Interview skills' if res['intv'] < 60 else 'your core academic subjects' }.")
-                
-                # Roadmap Section
-                st.subheader("💡 Improvement Roadmap")
-                tips = get_roadmap(res['jamb'], res['olevel'])
+            col1, col2 = st.columns(2)
+            with col1:
+                st.subheader(translations[lang]["roadmap"])
+                tips = get_roadmap(jamb, olevel)
                 for tip in tips:
                     st.info(tip)
+            
+            with col2:
+                res = st.session_state.last_result
+                st.info(f"🚀 **Insight Summary:** Your profile metrics suggest focusing on { 'your Interview skills' if res['intv'] < 60 else 'your core academic subjects' }.")
                 
                 # Bar Chart
-                st.markdown('<div class="result-card">', unsafe_allow_html=True)
                 df_plot = pd.DataFrame({"Metric": ["JAMB", "O-Level", "INT"], "Score": [res['jamb']/4, res['olevel'], res['intv']]})
                 fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
                 st.plotly_chart(fig, use_container_width=True)
-                st.markdown('</div>', unsafe_allow_html=True)
+        
 
 
 elif page == "Bulk Forecast":
