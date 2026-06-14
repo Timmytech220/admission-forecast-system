@@ -193,7 +193,6 @@ elif page == "Admission Forecast":
                 fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
                 st.plotly_chart(fig, use_container_width=True)
                 st.markdown('</div>', unsafe_allow_html=True)
-
 elif page == "Bulk Forecast":
     st.title("📂 Bulk Applicant Processing")
     st.write("Upload a CSV file containing columns: `jamb_score`, `olevel_points`, `interview_score`.")
@@ -203,23 +202,31 @@ elif page == "Bulk Forecast":
     if uploaded_file is not None:
         try:
             df = pd.read_csv(uploaded_file)
-            st.write("### Preview of uploaded data:")
-            st.dataframe(df.head())
+            required = ['jamb_score', 'olevel_points', 'interview_score']
             
-            if st.button("Process Batch"):
-                # Run predictions using the pipeline loaded earlier
-                predictions = pipeline.predict(df[['jamb_score', 'olevel_points', 'interview_score']])
-                df['Probability'] = predictions
-                df['Status'] = df['Probability'].apply(lambda x: 'QUALIFIED' if x >= 0.5 else 'NOT QUALIFIED')
+            # Check if required columns exist
+            if all(col in df.columns for col in required):
+                st.success("File format verified!")
+                st.write("### Preview of uploaded data:")
+                st.dataframe(df.head())
                 
-                st.success("Processing Complete!")
-                st.dataframe(df)
+                if st.button("Process Batch"):
+                    # Run predictions using the pipeline loaded earlier
+                    predictions = pipeline.predict(df[required])
+                    df['Probability'] = predictions
+                    df['Status'] = df['Probability'].apply(lambda x: 'QUALIFIED' if x >= 0.5 else 'NOT QUALIFIED')
+                    
+                    st.success("Processing Complete!")
+                    st.dataframe(df)
+                    
+                    # Download button for the results
+                    csv = df.to_csv(index=False).encode('utf-8')
+                    st.download_button("Download Full Report", csv, "results.csv", "text/csv")
+            else:
+                st.error(f"Missing columns! Your file must include: {required}")
                 
-                # Download button for the results
-                csv = df.to_csv(index=False).encode('utf-8')
-                st.download_button("Download Full Report", csv, "results.csv", "text/csv")
         except Exception as e:
-            st.error(f"Error: {e}. Please ensure your CSV has the correct column headers.")
+            st.error(f"Error processing file: {e}. Please ensure your CSV is properly formatted.")
             
 
 elif page == "History Log":
