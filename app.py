@@ -3,6 +3,12 @@ import pandas as pd
 import plotly.express as px
 import joblib
 
+# Check for a user session in the URL
+query_params = st.query_params
+if "user_id" in query_params:
+    user_id = query_params["user_id"]
+    # Here, you would call a function to load the user's data from your Google Sheet
+    # load_user_from_sheet(user_id)
 
 st.markdown("""
     <style>
