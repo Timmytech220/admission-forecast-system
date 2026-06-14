@@ -193,6 +193,8 @@ elif page == "Admission Forecast":
                 fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
                 st.plotly_chart(fig, use_container_width=True)
                 st.markdown('</div>', unsafe_allow_html=True)
+
+
 elif page == "Bulk Forecast":
     st.title("📂 Bulk Applicant Processing")
     st.write("Upload a CSV file containing columns: `jamb_score`, `olevel_points`, `interview_score`.")
@@ -211,8 +213,14 @@ elif page == "Bulk Forecast":
                 st.dataframe(df.head())
                 
                 if st.button("Process Batch"):
-                    # Run predictions using the pipeline loaded earlier
-                    predictions = pipeline.predict(df[required])
+                    # Create a temporary copy to rename the column for the model
+                    df_to_predict = df.copy()
+                    df_to_predict = df_to_predict.rename(columns={'olevel_points': 'waec_points'})
+                    
+                    # Run predictions using the renamed column
+                    predictions = pipeline.predict(df_to_predict[['jamb_score', 'waec_points', 'interview_score']])
+                    
+                    # Add results to the original dataframe
                     df['Probability'] = predictions
                     df['Status'] = df['Probability'].apply(lambda x: 'QUALIFIED' if x >= 0.5 else 'NOT QUALIFIED')
                     
@@ -228,6 +236,7 @@ elif page == "Bulk Forecast":
         except Exception as e:
             st.error(f"Error processing file: {e}. Please ensure your CSV is properly formatted.")
             
+
 
 elif page == "History Log":
     st.title("📋 Prediction History")
