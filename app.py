@@ -200,32 +200,42 @@ elif page == "Admission Forecast":
         olevel = calculate_olevel_points([eng, mat, sub3_grade, sub4_grade, sub5_grade])
         intv = st.slider("Interview Score", 0, 100, 50)
         
-        # --- THE BUTTON IS NOW INTEGRATED & BULLETPROOF ---
+        
+        # --- THE BUTTON IS NOW INTEGRATED, POLISHED & PLAYFUL ---
         if st.button(translations[lang]["btn"], type="primary"):
             # Validation Checks
             if not name.strip(): 
-                st.error("⚠️ Please enter a student name.")
+                st.error("⚠️ Oops! Don't forget to enter your name, superstar!")
             elif "None" in [eng, mat, sub3_grade, sub4_grade, sub5_grade]:
-                st.error("⚠️ Please select valid grades for all 5 subjects.")
+                st.error("⚠️ Hold on! Make sure you select grades for all 5 subjects.")
             else:
-                try:
-                    # 1. Prediction Logic
-                    input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [olevel], "interview_score": [intv]})
-                    prob = float(pipeline.predict(input_data)[0])
-                    status_text = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
-                    status = f"{status_text} ({prob:.1%})"
-                    
-                    # 2. Database Save
-                    save_data(name, status, f"{prob:.1%}", str(jamb), str(olevel), str(intv))
-                    
-                    # 3. Session State
-                    st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv}
-                    st.session_state.history.append(st.session_state.last_result)
-                    
-                    st.success(f"{translations[lang]['success']}: {status}")
-                    
-                except Exception as e:
-                    st.error("⚠️ An error occurred during processing. Please check your internet or try again.")
+                # 2. Show a spinner while the magic happens
+                with st.spinner('Analyzing your profile, hang tight... 🚀'):
+                    try:
+                        # 3. Prediction Logic
+                        input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [olevel], "interview_score": [intv]})
+                        prob = float(pipeline.predict(input_data)[0])
+                        status_text = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
+                        status = f"{status_text} ({prob:.1%})"
+                        
+                        # 4. Database Save
+                        save_data(name, status, f"{prob:.1%}", str(jamb), str(olevel), str(intv))
+                        
+                        # 5. Session State
+                        st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv}
+                        st.session_state.history.append(st.session_state.last_result)
+                        
+                        # 6. Playful Success Feedback
+                        if prob >= 0.5:
+                            st.toast('🎉 Amazing! Your profile looks like a winner!', icon='✨')
+                            st.success(f"Success! {status}")
+                        else:
+                            st.toast('Keep pushing! Your roadmap shows you have potential!', icon='💪')
+                            st.warning(f"Result: {status}")
+                        
+                    except Exception as e:
+                        st.error("⚠️ Oops! A little glitch in the matrix. Check your internet and try again!")
+                        
 
     with col2:
         # Results Display
