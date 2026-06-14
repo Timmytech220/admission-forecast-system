@@ -95,14 +95,16 @@ pipeline = joblib.load("final_pipeline.pkl")
 if "history" not in st.session_state: st.session_state.history = []
 if "last_result" not in st.session_state: st.session_state.last_result = None
 
+
 # --- 4. SIDEBAR ---
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2942/2942813.png", width=80) 
     st.markdown("## Timmytech Console")
-    page = st.radio("MAIN NAVIGATION", ["Dashboard", "Admission Forecast", "History Log", "Export Reports", "Help & Support"])
+    # Added "Bulk Forecast" here
+    page = st.radio("MAIN NAVIGATION", ["Dashboard", "Admission Forecast", "Bulk Forecast", "History Log", "Export Reports", "Help & Support"])
     st.divider()
     st.write("Developed by: **Ajayi Oluwatimileyin Daniel**")
-
+    
 
 # --- 5. PAGE LOGIC ---
 if page == "Dashboard":
