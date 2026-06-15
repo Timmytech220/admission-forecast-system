@@ -4,6 +4,30 @@ import plotly.express as px
 import joblib
 import os
 
+
+def load_user_from_sheet(user_id):
+    try:
+        # Assuming you use st.connection for your Google Sheets
+        conn = st.connection("gsheets", type="gsheets")
+        df = conn.read(worksheet="Sheet1") # Replace 'Sheet1' with your actual sheet name
+        user_data = df[df['id'] == user_id]
+        return user_data
+    except Exception as e:
+        return None
+
+# Check for a user session in the URL
+if "user_id" in query_params:
+    user_id = query_params["user_id"]
+    if "loaded_user" not in st.session_state:
+        st.session_state.loaded_user = load_user_from_sheet(user_id)
+        
+        # If we found the user, fill their info into session_state automatically
+        if st.session_state.loaded_user is not None and not st.session_state.loaded_user.empty:
+            st.toast(f"Welcome back, {user_id}! Loading your data... 📂", icon="✨")
+            # You would map your columns here: 
+            # st.session_state.name = st.session_state.loaded_user['name'].iloc[0]
+
+
 if 'history' not in st.session_state:
     # This function should fetch your data from Google Sheets
     st.session_state.history = load_user_from_sheet() 
@@ -59,27 +83,6 @@ def create_shareable_card(name, status, jamb, olevel, intv):
 query_params = st.query_params
 
 # This function fetches data from Google Sheets based on the user_id in the URL
-def load_user_from_sheet(user_id):
-    try:
-        # Assuming you use st.connection for your Google Sheets
-        conn = st.connection("gsheets", type="gsheets")
-        df = conn.read(worksheet="Sheet1") # Replace 'Sheet1' with your actual sheet name
-        user_data = df[df['id'] == user_id]
-        return user_data
-    except Exception as e:
-        return None
-
-# Check for a user session in the URL
-if "user_id" in query_params:
-    user_id = query_params["user_id"]
-    if "loaded_user" not in st.session_state:
-        st.session_state.loaded_user = load_user_from_sheet(user_id)
-        
-        # If we found the user, fill their info into session_state automatically
-        if st.session_state.loaded_user is not None and not st.session_state.loaded_user.empty:
-            st.toast(f"Welcome back, {user_id}! Loading your data... 📂", icon="✨")
-            # You would map your columns here: 
-            # st.session_state.name = st.session_state.loaded_user['name'].iloc[0]
 
 # --- 2. REST OF YOUR CODE (CSS, Translations, UI, etc.) ---
 
