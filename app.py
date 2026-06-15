@@ -390,40 +390,35 @@ elif page == "History Log":
     st.title("📋 Prediction History")
     if st.session_state.history: st.dataframe(pd.DataFrame(st.session_state.history), use_container_width=True)
     else: st.write("No records yet.")
-
 elif page == "Export Reports":
     st.title("🖨️ Export Official Reports")
     
     if not st.session_state.history:
         st.info("No records found in history to export.")
     else:
-        st.write("Click below to download individual student reports:")
+        st.write("Click below to download professional student result cards:")
         
-        # We loop through history and give each button a unique key based on its index
         for i, s in enumerate(st.session_state.history):
             with st.container():
                 st.markdown(f'<div class="report-card">', unsafe_allow_html=True)
                 st.write(f"**Student:** {s['name']} | **Status:** {s['status']}")
                 
-                report_txt = f"""
-                --- TIMMYTECH ADMISSION REPORT ---
-                Name: {s['name']}
-                Final Decision: {s['status']}
-                JAMB Score: {s['jamb']}
-                O-Level Points: {s['olevel']}
-                Interview Score: {s['intv']}
-                ----------------------------------
-                """
+                # Generate the professional card for each history item
+                # This uses your 5-argument function!
+                card_path = create_shareable_card(s['name'], s['status'], s['jamb'], s['olevel'], s['intv'])
                 
-                st.download_button(
-                    label=f"📥 Download {s['name']}'s Report",
-                    data=report_txt,
-                    file_name=f"{s['name']}_report.txt",
-                    mime="text/plain",
-                    key=f"dl_btn_{i}" # THE UNIQUE KEY FIXES THE ERROR
-                )
+                if os.path.exists(card_path):
+                    with open(card_path, "rb") as file:
+                        st.download_button(
+                            label=f"📸 Download {s['name']}'s Result Card",
+                            data=file,
+                            file_name=f"{s['name']}_result.png",
+                            mime="image/png",
+                            key=f"dl_card_btn_{i}"
+                        )
                 st.markdown('</div>', unsafe_allow_html=True)
-        
+    
+
 
 elif page == "Help & Support":
     st.title("💬 Help & Support Center")
