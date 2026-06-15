@@ -29,6 +29,59 @@ if 'history' not in st.session_state:
     
 
 
+def create_shareable_card(name, status, jamb, olevel, intv):
+    # 1. Setup
+    report_id = f"TT-{uuid.uuid4().hex[:8].upper()}"
+    issue_date = datetime.now().strftime("%d-%m-%Y")
+    width, height = 800, 1000
+    # Professional white-to-light-grey subtle background
+    img = Image.new('RGB', (width, height), color=(255, 255, 255))
+    d = ImageDraw.Draw(img)
+
+    # 2. Decorative Border (Thick Navy)
+    d.rectangle([20, 20, 780, 980], outline=(0, 51, 102), width=10)
+
+    # 3. Add Centered Logo
+    try:
+        logo = Image.open("logo.png").convert("RGBA")
+        logo = logo.resize((150, 150))
+        img.paste(logo, (325, 50), logo)
+    except:
+        d.text((350, 100), "LOGO", fill=(0, 51, 102))
+
+    # 4. Centered Header
+    d.text((130, 230), "OFFICIAL ADMISSION VERIFICATION REPORT", fill=(0, 51, 102))
+    d.line((100, 260, 700, 260), fill=(0, 51, 102), width=3)
+
+    # 5. Metadata (Centered Grid)
+    d.text((280, 290), f"REPORT NO: {report_id}", fill=(0, 0, 0))
+    d.text((280, 320), f"DATE: {issue_date}", fill=(0, 0, 0))
+
+    # 6. Performance Summary Box (Slate Grey Background)
+    d.rectangle([100, 400, 700, 600], fill=(245, 245, 245), outline=(0, 51, 102), width=2)
+    d.text((250, 420), "ACADEMIC PERFORMANCE SUMMARY", fill=(0, 51, 102))
+    d.text((150, 480), f"JAMB SCORE:    {jamb}", fill=(0, 0, 0))
+    d.text((150, 520), f"O-LEVEL PTS:   {olevel}", fill=(0, 0, 0))
+    d.text((150, 560), f"INTERVIEW:     {intv}", fill=(0, 0, 0))
+
+    # 7. The "Rubber Stamp" Effect
+    # Create a separate layer for the stamp to make it rotated
+    stamp_layer = Image.new('RGBA', (300, 100), (255, 255, 255, 0))
+    s_draw = ImageDraw.Draw(stamp_layer)
+    verdict_color = (0, 128, 0, 150) if "QUALIFIED" in status else (178, 34, 34, 150)
+    s_draw.text((20, 20), status.upper(), fill=verdict_color)
+    
+    # Rotate the stamp and paste
+    stamp_layer = stamp_layer.rotate(20, expand=True)
+    img.paste(stamp_layer, (450, 700), stamp_layer)
+
+    # Footer
+    d.text((250, 920), "Verified by Timmytech Education Systems", fill=(100, 100, 100))
+
+    card_path = "official_result_card.png"
+    img.save(card_path)
+    return card_path
+        
 
 def create_shareable_card(name, status, jamb, olevel, intv):
     # 1. Generate Metadata
