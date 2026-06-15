@@ -295,34 +295,54 @@ elif page == "Admission Forecast":
                         st.error(f"⚠️ A glitch occurred: {e}")
                         st.session_state.last_result = None
 
-        # 2. THE RESULT DISPLAY
-    if "last_result" in st.session_state and st.session_state.last_result:
-        res = st.session_state.last_result
         
-        # Display the status text
-        if res['prob'] >= 0.5:
-            st.success(f"Success! {res['status']}")
-            
-            # Check if the function exists before calling it
-            if 'create_shareable_card' in globals():
-                try:
-                    card_path = create_shareable_card(res['name'], res['status'])
-                    if card_path and os.path.exists(card_path):
-                        with open(card_path, "rb") as file:
-                            st.download_button(
-                                label="📸 Download Result Card to share!", 
-                                data=file, 
-                                file_name="my_admission_result.png", 
-                                mime="image/png"
-                            )
-                except Exception as e:
-                    st.error(f"Could not generate card: {e}")
-            else:
-                st.warning("Result card generator is not currently available.")
-        else:
-            st.toast('Keep pushing! Your roadmap shows you have potential!', icon='💪')
-            st.warning(f"Result: {res['status']}")
     
+        # 2. THE RESULT DISPLAY (Inside col1, under the button)
+    
+    # Ensure the data is stored in session state when the forecast runs
+    # (Assuming 'name', 'status', 'prob', 'jamb', 'olevel', 'intv' are calculated in your code above)
+    st.session_state.last_result = {
+        "name": name, 
+        "status": status, 
+        "prob": prob, 
+        "jamb": jamb, 
+        "olevel": olevel, 
+        "intv": intv
+    }
+
+    res = st.session_state.last_result
+    
+    if res['prob'] >= 0.5:
+        st.success(f"Success! {res['status']}")
+        
+        # Check if the function exists
+        if 'create_shareable_card' in globals():
+            try:
+                # Generate the card with the stored metrics
+                card_path = create_shareable_card(
+                    res['name'], 
+                    res['status'], 
+                    res['jamb'], 
+                    res['olevel'], 
+                    res['intv']
+                )
+                
+                if card_path and os.path.exists(card_path):
+                    with open(card_path, "rb") as file:
+                        st.download_button(
+                            label="📸 Download Result Card to share!", 
+                            data=file, 
+                            file_name="official_result_card.png", 
+                            mime="image/png"
+                        )
+            except Exception as e:
+                st.error(f"Could not generate card: {e}")
+        else:
+            st.warning("Result card generator is not currently available.")
+    else:
+        st.toast('Keep pushing! Your roadmap shows you have potential!', icon='💪')
+        st.warning(f"Result: {res['status']}")
+        
     
     # 3. THE ROADMAP DISPLAY
     with col2:
