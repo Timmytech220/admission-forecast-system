@@ -232,9 +232,9 @@ elif page == "Admission Forecast":
 
         # --- THE BUTTON IS NOW INTEGRATED, POLISHED & PLAYFUL ---
 
-    # Ensure this line has the correct indentation (4 spaces if inside a column)
+
+    # 1. THE FORECAST BUTTON
     if st.button(translations[lang]["btn"], type="primary"):
-        # Validation Checks
         if not name.strip(): 
             st.error("⚠️ Oops! Don't forget to enter your name, superstar!")
         elif "None" in [eng, mat, sub3_grade, sub4_grade, sub5_grade]:
@@ -251,14 +251,12 @@ elif page == "Admission Forecast":
                     
                     st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv}
                     st.session_state.history.append(st.session_state.last_result)
-                    
                     st.rerun() 
-                    
                 except Exception as e:
                     st.error(f"⚠️ A glitch occurred: {e}")
                     st.session_state.last_result = None
 
-    # This display block MUST be at the same indentation level as the 'if st.button' above
+    # 2. THE RESULT DISPLAY (Inside col1, under the button)
     if "last_result" in st.session_state and st.session_state.last_result:
         res = st.session_state.last_result
         if res['prob'] >= 0.5:
@@ -267,37 +265,26 @@ elif page == "Admission Forecast":
                 card_path = create_shareable_card(res['name'], res['status'])
                 if card_path and os.path.exists(card_path):
                     with open(card_path, "rb") as file:
-                        st.download_button("📸 Download Result Card", data=file, file_name="result.png", mime="image/png")
+                        st.download_button("📸 Download Result Card to share!", data=file, file_name="my_admission_result.png", mime="image/png")
         else:
+            st.toast('Keep pushing! Your roadmap shows you have potential!', icon='💪')
             st.warning(f"Result: {res['status']}")
-                        
-                        
-                        # Success Logic handled outside/after spinner completes for better UI flow
-                        
-                    
-                                label="📸 Download Result Card to share!",
-                                data=file,
-                                file_name="my_admission_result.png",
-                                mime="image/png"
-                            )
-                    else:
-                        st.toast('Keep pushing! Your roadmap shows you have potential!', icon='💪')
-                        st.warning(f"Result: {res['status']}")
 
-    with col2:
-        # Results Display for the Roadmap
-        if "last_result" in st.session_state and st.session_state.last_result:
-            res = st.session_state.last_result
-            st.subheader(translations[lang]["roadmap"])
-            tips = get_roadmap(res['jamb'], res['olevel'])
-            for tip in tips:
-                st.info(tip)
-            st.info(f"🚀 **Insight Summary:** Focus on {'Interview skills' if res['intv'] < 60 else 'academic subjects'}.")
-            
-            # Using use_container_width=True for responsiveness
-            df_plot = pd.DataFrame({"Metric": ["JAMB", "O-Level", "INT"], "Score": [res['jamb']/4, res['olevel'], res['intv']]})
-            fig = px.bar(df_plot, x="Metric", y="Score", color="Sco tore", color_continuous_scale="Blues")
-            st.plotly_chart(fig, use_container_width=True)
+# 3. THE ROADMAP DISPLAY (Inside col2)
+with col2:
+    if "last_result" in st.session_state and st.session_state.last_result:
+        res = st.session_state.last_result
+        st.subheader(translations[lang]["roadmap"])
+        tips = get_roadmap(res['jamb'], res['olevel'])
+        for tip in tips:
+            st.info(tip)
+        st.info(f"🚀 **Insight Summary:** Focus on {'Interview skills' if res['intv'] < 60 else 'academic subjects'}.")
+        
+        df_plot = pd.DataFrame({"Metric": ["JAMB", "O-Level", "INT"], "Score": [res['jamb']/4, res['olevel'], res['intv']]})
+        fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
+        st.plotly_chart(fig, use_container_width=True)
+                                           
+
 
 
 
