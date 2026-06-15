@@ -234,14 +234,14 @@ with st.sidebar:
 
 
 
-# --- 5. PAGE LOGIC ---
-elif page == "Dashboard":
+# --- 5. PAGE LOGIC 
+if page == "Dashboard":
     st.title("Welcome to Timmytech Admission Forecast System")
     
-    # 1. Add the dashboard image back
+    # 1. Add the dashboard image
     st.image("https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2000", 
              caption="Admission Excellence", 
-             use_container_width=True) # Makes the image responsive to your screen size
+             use_container_width=True)
 
     # 2. Add professional metrics if data exists
     if len(st.session_state.history) > 0:
@@ -258,9 +258,11 @@ elif page == "Dashboard":
         
         fig = px.bar(status_counts, x='Status', y='Count', color='Status', 
                      title="Admission Status Distribution")
-        st.plotly_chart(fig, use_container_width=True) # Makes chart interactive
+        st.plotly_chart(fig, use_container_width=True)
     else:
         st.info("No forecast data available yet. Head over to 'Admission Forecast' to start!")
+
+
         
 
 elif page == "Admission Forecast":
