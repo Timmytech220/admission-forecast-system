@@ -3,6 +3,12 @@ import pandas as pd
 import plotly.express as px
 import joblib
 import os
+
+if 'history' not in st.session_state:
+    # This function should fetch your data from Google Sheets
+    st.session_state.history = load_user_from_sheet() 
+    
+
 from PIL import Image, ImageDraw, ImageFont # You may need to install Pillow
 
 def create_shareable_card(name, status, jamb, olevel, intv):
@@ -318,32 +324,48 @@ elif page == "Admission Forecast":
                         st.session_state.last_result = None
 
     # 2. THE RESULT DISPLAY (Must be outside the button, but check if result exists)
-    if "last_result" in st.session_state and st.session_state.last_result:
-        res = st.session_state.last_result
-        with col1:
-            if res['prob'] >= 0.5:
-                st.success(f"Success! {res['status']}")
-                if 'create_shareable_card' in globals():
-                    try:
-                        card_path = create_shareable_card(res['name'], res['status'], res['jamb'], res['olevel'], res['intv'])
-                        if card_path and os.path.exists(card_path):
-                            with open(card_path, "rb") as file:
-                                st.download_button("📸 Download Result Card!", file, "official_result_card.png", "image/png")
-                    except Exception as e:
-                        st.error(f"Could not generate card: {e}")
-            else:
-                st.toast('Keep pushing!', icon='💪')
-                st.warning(f"Result: {res['status']}")
+    
+if "last_result" in st.session_state and st.session_state.last_result:
+    res = st.session_state.last_result
+    
+    with col1:
+        # 1. Status Message
+        if res['prob'] >= 0.5:
+            st.success(f"Success! {res['status']}")
+        else:
+            st.toast('Keep pushing!', icon='💪')
+            st.warning(f"Result: {res['status']}")
         
-        with col2:
-            st.subheader(translations[lang]["roadmap"])
-            tips = get_roadmap(res['jamb'], res['olevel'])
-            for tip in tips: st.info(tip)
-            st.info(f"🚀 **Insight Summary:** Focus on {'Interview skills' if res['intv'] < 60 else 'academic subjects'}.")
-            df_plot = pd.DataFrame({"Metric": ["JAMB", "O-Level", "INT"], "Score": [res['jamb']/4, res['olevel'], res['intv']]})
-            fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
-            st.plotly_chart(fig, use_container_width=True)
-
+        # 2. Download Button (Now visible for EVERYONE)
+        if 'create_shareable_card' in globals():
+            try:
+                card_path = create_shareable_card(res['name'], res['status'], res['jamb'], res['olevel'], res['intv'])
+                if card_path and os.path.exists(card_path):
+                    with open(card_path, "rb") as file:
+                        st.download_button(
+                            label="📸 Download Result Card!", 
+                            data=file, 
+                            file_name="official_result_card.png", 
+                            mime="image/png"
+                        )
+            except Exception as e:
+                st.error(f"Could not generate card: {e}")
+        else:
+            st.warning("Result card generator is not currently available.")
+    
+    with col2:
+        # 3. Roadmap and Charts
+        st.subheader(translations[lang]["roadmap"])
+        tips = get_roadmap(res['jamb'], res['olevel'])
+        for tip in tips: 
+            st.info(tip)
+        
+        st.info(f"🚀 **Insight Summary:** Focus on {'Interview skills' if res['intv'] < 60 else 'academic subjects'}.")
+        
+        df_plot = pd.DataFrame({"Metric": ["JAMB", "O-Level", "INT"], "Score": [res['jamb']/4, res['olevel'], res['intv']]})
+        fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
+        st.plotly_chart(fig, use_container_width=True)
+                                                  
 
 elif page == "Bulk Forecast":
     st.title("📂 Bulk Applicant Processing")
