@@ -5,22 +5,49 @@ import joblib
 import os
 from PIL import Image, ImageDraw, ImageFont # You may need to install Pillow
 
-def create_shareable_card(name, status):
-    # This creates a basic branded image. 
-    # You can expand this to include your logo and custom backgrounds.
-    img = Image.new('RGB', (800, 400), color=(0, 51, 102)) # Your brand color
+  def create_shareable_card(name, status, jamb, olevel, intv):
+    width, height = 800, 500
+    # Create a clean white background
+    img = Image.new('RGB', (width, height), color=(255, 255, 255))
     d = ImageDraw.Draw(img)
     
-    # Add text to the card
-    d.text((50, 50), "Timmytech Admission Result", fill=(255, 255, 255))
-    d.text((50, 150), f"Name: {name}", fill=(255, 255, 255))
-    d.text((50, 200), f"Status: {status}", fill=(0, 255, 0))
+    # 1. Add a professional deep blue border
+    d.rectangle([0, 0, width-1, height-1], outline=(0, 51, 102), width=10)
     
-    # Save the file
-    card_path = "temp_result_card.png"
+    # 2. Add Logo (Make sure 'logo.png' is in your project folder)
+    try:
+        logo = Image.open("logo.png").convert("RGBA")
+        logo = logo.resize((120, 120))
+        img.paste(logo, (620, 40), logo)
+    except:
+        d.text((650, 80), "[LOGO]", fill=(200, 200, 200))
+    
+    # 3. Header Styling
+    d.text((50, 50), "OFFICIAL ADMISSION FORECAST", fill=(0, 51, 102), font_size=30)
+    d.text((50, 85), "TIMMYTECH EDUCATION SYSTEMS", fill=(100, 100, 100), font_size=20)
+    d.line([50, 120, 750, 120], fill=(0, 51, 102), width=3)
+    
+    # 4. Applicant Details
+    d.text((50, 150), f"APPLICANT NAME: {name.upper()}", fill=(0, 0, 0))
+    
+    # 5. Metrics Box
+    d.rectangle([50, 190, 750, 320], outline=(230, 230, 230), width=2)
+    d.text((70, 210), f"JAMB SCORE:    {jamb}", fill=(0, 0, 0))
+    d.text((70, 240), f"O-LEVEL PTS:   {olevel}", fill=(0, 0, 0))
+    d.text((70, 270), f"INTERVIEW:     {intv}/100", fill=(0, 0, 0))
+    
+    # 6. Status Label
+    status_color = (0, 150, 0) if "QUALIFIED" in status else (200, 0, 0)
+    d.text((50, 360), "FINAL ADMISSION DECISION:", fill=(0, 0, 0))
+    d.text((450, 360), status, fill=status_color)
+    
+    # 7. Footer
+    d.text((50, 460), "Verified Document - Do not alter.", fill=(150, 150, 150))
+    
+    card_path = "official_result_card.png"
     img.save(card_path)
     return card_path
-    
+      
 
 # --- 1. THE PERSISTENCE HOOK (Must be at the top) ---
 query_params = st.query_params
