@@ -2,6 +2,25 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import joblib
+import os
+from PIL import Image, ImageDraw, ImageFont # You may need to install Pillow
+
+def create_shareable_card(name, status):
+    # This creates a basic branded image. 
+    # You can expand this to include your logo and custom backgrounds.
+    img = Image.new('RGB', (800, 400), color=(0, 51, 102)) # Your brand color
+    d = ImageDraw.Draw(img)
+    
+    # Add text to the card
+    d.text((50, 50), "Timmytech Admission Result", fill=(255, 255, 255))
+    d.text((50, 150), f"Name: {name}", fill=(255, 255, 255))
+    d.text((50, 200), f"Status: {status}", fill=(0, 255, 0))
+    
+    # Save the file
+    card_path = "temp_result_card.png"
+    img.save(card_path)
+    return card_path
+    
 
 # --- 1. THE PERSISTENCE HOOK (Must be at the top) ---
 query_params = st.query_params
