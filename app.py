@@ -262,8 +262,7 @@ if page == "Dashboard":
     else:
         st.info("No forecast data available yet. Head over to 'Admission Forecast' to start!")
 
-
-   elif page == "Admission Forecast":
+elif page == "Admission Forecast":
     st.title(translations[lang]["title"])
     col1, col2 = st.columns([1, 1])
     
