@@ -207,7 +207,6 @@ elif page == "Admission Forecast":
         name = st.text_input("Full Name")
         jamb = st.slider("JAMB Score", 100, 400, 250)
         
-        # O-Level Inputs
         st.write("**Select your 5 core/required subjects:**")
         c_eng, c_mat = st.columns(2)
         with c_eng: eng = st.selectbox("English Language", ['None', 'A1', 'B2', 'B3', 'C4', 'C5', 'C6'])
@@ -227,109 +226,84 @@ elif page == "Admission Forecast":
         olevel = calculate_olevel_points([eng, mat, sub3_grade, sub4_grade, sub5_grade])
         intv = st.slider("Interview Score", 0, 100, 50)
         
-        
-        
+        # 1. THE FORECAST BUTTON
+        if st.button(translations[lang]["btn"], type="primary"):
+            if not name.strip(): 
+                st.error("⚠️ Oops! Don't forget to enter your name, superstar!")
+            elif "None" in [eng, mat, sub3_grade, sub4_grade, sub5_grade]:
+                st.error("⚠️ Hold on! Make sure you select grades for all 5 subjects.")
+            else:
+                with st.spinner('Analyzing your profile, hang tight... 🚀'):
+                    try:
+                        input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [olevel], "interview_score": [intv]})
+                        prob = float(pipeline.predict(input_data)[0])
+                        status_text = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
+                        status = f"{status_text} ({prob:.1%})"
+                        
+                        save_data(name, status, f"{prob:.1%}", str(jamb), str(olevel), str(intv))
+                        
+                        st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv}
+                        st.session_state.history.append(st.session_state.last_result)
+                        st.rerun() 
+                    except Exception as e:
+                        st.error(f"⚠️ A glitch occurred: {e}")
+                        st.session_state.last_result = None
 
-        # --- THE BUTTON IS NOW INTEGRATED, POLISHED & PLAYFUL ---
+        # 2. THE RESULT DISPLAY
+        if "last_result" in st.session_state and st.session_state.last_result:
+            res = st.session_state.last_result
+            if res['prob'] >= 0.5:
+                st.success(f"Success! {res['status']}")
+                if 'create_shareable_card' in globals():
+                    card_path = create_shareable_card(res['name'], res['status'])
+                    if card_path and os.path.exists(card_path):
+                        with open(card_path, "rb") as file:
+                            st.download_button("📸 Download Result Card to share!", data=file, file_name="my_admission_result.png", mime="image/png")
+            else:
+                st.toast('Keep pushing! Your roadmap shows you have potential!', icon='💪')
+                st.warning(f"Result: {res['status']}")
 
-
-    # 1. THE FORECAST BUTTON
-    if st.button(translations[lang]["btn"], type="primary"):
-        if not name.strip(): 
-            st.error("⚠️ Oops! Don't forget to enter your name, superstar!")
-        elif "None" in [eng, mat, sub3_grade, sub4_grade, sub5_grade]:
-            st.error("⚠️ Hold on! Make sure you select grades for all 5 subjects.")
-        else:
-            with st.spinner('Analyzing your profile, hang tight... 🚀'):
-                try:
-                    input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [olevel], "interview_score": [intv]})
-                    prob = float(pipeline.predict(input_data)[0])
-                    status_text = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
-                    status = f"{status_text} ({prob:.1%})"
-                    
-                    save_data(name, status, f"{prob:.1%}", str(jamb), str(olevel), str(intv))
-                    
-                    st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv}
-                    st.session_state.history.append(st.session_state.last_result)
-                    st.rerun() 
-                except Exception as e:
-                    st.error(f"⚠️ A glitch occurred: {e}")
-                    st.session_state.last_result = None
-
-    # 2. THE RESULT DISPLAY (Inside col1, under the button)
-    if "last_result" in st.session_state and st.session_state.last_result:
-        res = st.session_state.last_result
-        if res['prob'] >= 0.5:
-            st.success(f"Success! {res['status']}")
-            if 'create_shareable_card' in globals():
-                card_path = create_shareable_card(res['name'], res['status'])
-                if card_path and os.path.exists(card_path):
-                    with open(card_path, "rb") as file:
-                        st.download_button("📸 Download Result Card to share!", data=file, file_name="my_admission_result.png", mime="image/png")
-        else:
-            st.toast('Keep pushing! Your roadmap shows you have potential!', icon='💪')
-            st.warning(f"Result: {res['status']}")
-
-# 3. THE ROADMAP DISPLAY (Inside col2)
-with col2:
-    if "last_result" in st.session_state and st.session_state.last_result:
-        res = st.session_state.last_result
-        st.subheader(translations[lang]["roadmap"])
-        tips = get_roadmap(res['jamb'], res['olevel'])
-        for tip in tips:
-            st.info(tip)
-        st.info(f"🚀 **Insight Summary:** Focus on {'Interview skills' if res['intv'] < 60 else 'academic subjects'}.")
-        
-        df_plot = pd.DataFrame({"Metric": ["JAMB", "O-Level", "INT"], "Score": [res['jamb']/4, res['olevel'], res['intv']]})
-        fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
-        st.plotly_chart(fig, use_container_width=True)
-                                           
-
-
-
+    # 3. THE ROADMAP DISPLAY
+    with col2:
+        if "last_result" in st.session_state and st.session_state.last_result:
+            res = st.session_state.last_result
+            st.subheader(translations[lang]["roadmap"])
+            tips = get_roadmap(res['jamb'], res['olevel'])
+            for tip in tips:
+                st.info(tip)
+            st.info(f"🚀 **Insight Summary:** Focus on {'Interview skills' if res['intv'] < 60 else 'academic subjects'}.")
+            
+            df_plot = pd.DataFrame({"Metric": ["JAMB", "O-Level", "INT"], "Score": [res['jamb']/4, res['olevel'], res['intv']]})
+            fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
+            st.plotly_chart(fig, use_container_width=True)
 
 elif page == "Bulk Forecast":
     st.title("📂 Bulk Applicant Processing")
     st.write("Upload a CSV file containing columns: `jamb_score`, `olevel_points`, `interview_score`.")
-    
     uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
-    
     if uploaded_file is not None:
         try:
             df = pd.read_csv(uploaded_file)
             required = ['jamb_score', 'olevel_points', 'interview_score']
-            
-            # Check if required columns exist
             if all(col in df.columns for col in required):
                 st.success("File format verified!")
                 st.write("### Preview of uploaded data:")
                 st.dataframe(df.head())
-                
                 if st.button("Process Batch"):
-                    # Create a temporary copy to rename the column for the model
                     df_to_predict = df.copy()
                     df_to_predict = df_to_predict.rename(columns={'olevel_points': 'waec_points'})
-                    
-                    # Run predictions using the renamed column
                     predictions = pipeline.predict(df_to_predict[['jamb_score', 'waec_points', 'interview_score']])
-                    
-                    # Add results to the original dataframe
                     df['Probability'] = predictions
                     df['Status'] = df['Probability'].apply(lambda x: 'QUALIFIED' if x >= 0.5 else 'NOT QUALIFIED')
-                    
                     st.success("Processing Complete!")
                     st.dataframe(df)
-                    
-                    # Download button for the results
                     csv = df.to_csv(index=False).encode('utf-8')
                     st.download_button("Download Full Report", csv, "results.csv", "text/csv")
             else:
                 st.error(f"Missing columns! Your file must include: {required}")
-                
         except Exception as e:
             st.error(f"Error processing file: {e}. Please ensure your CSV is properly formatted.")
             
-
 
 elif page == "History Log":
     st.title("📋 Prediction History")
