@@ -28,59 +28,71 @@ if 'history' not in st.session_state:
     
     
 
-
 def create_shareable_card(name, status, jamb, olevel, intv):
     # 1. Setup
     report_id = f"TT-{uuid.uuid4().hex[:8].upper()}"
     issue_date = datetime.now().strftime("%d-%m-%Y")
     width, height = 800, 1000
-    # Professional white-to-light-grey subtle background
-    img = Image.new('RGB', (width, height), color=(255, 255, 255))
+    img = Image.new('RGB', (width, height), color=(250, 255, 250)) # Soft green tint
     d = ImageDraw.Draw(img)
 
-    # 2. Decorative Border (Thick Navy)
-    d.rectangle([20, 20, 780, 980], outline=(0, 51, 102), width=10)
+    # 2. Border: Professional "Certificate" style
+    d.rectangle([20, 20, 780, 980], outline=(40, 100, 40), width=15)
+    d.rectangle([40, 40, 760, 960], outline=(40, 100, 40), width=2)
 
-    # 3. Add Centered Logo
+    # 3. Logo (Centered)
     try:
         logo = Image.open("logo.png").convert("RGBA")
-        logo = logo.resize((150, 150))
-        img.paste(logo, (325, 50), logo)
+        logo = logo.resize((120, 120))
+        img.paste(logo, (340, 60), logo)
     except:
-        d.text((350, 100), "LOGO", fill=(0, 51, 102))
+        pass
 
-    # 4. Centered Header
-    d.text((130, 230), "OFFICIAL ADMISSION VERIFICATION REPORT", fill=(0, 51, 102))
-    d.line((100, 260, 700, 260), fill=(0, 51, 102), width=3)
-
-    # 5. Metadata (Centered Grid)
-    d.text((280, 290), f"REPORT NO: {report_id}", fill=(0, 0, 0))
-    d.text((280, 320), f"DATE: {issue_date}", fill=(0, 0, 0))
-
-    # 6. Performance Summary Box (Slate Grey Background)
-    d.rectangle([100, 400, 700, 600], fill=(245, 245, 245), outline=(0, 51, 102), width=2)
-    d.text((250, 420), "ACADEMIC PERFORMANCE SUMMARY", fill=(0, 51, 102))
-    d.text((150, 480), f"JAMB SCORE:    {jamb}", fill=(0, 0, 0))
-    d.text((150, 520), f"O-LEVEL PTS:   {olevel}", fill=(0, 0, 0))
-    d.text((150, 560), f"INTERVIEW:     {intv}", fill=(0, 0, 0))
-
-    # 7. The "Rubber Stamp" Effect
-    # Create a separate layer for the stamp to make it rotated
-    stamp_layer = Image.new('RGBA', (300, 100), (255, 255, 255, 0))
-    s_draw = ImageDraw.Draw(stamp_layer)
-    verdict_color = (0, 128, 0, 150) if "QUALIFIED" in status else (178, 34, 34, 150)
-    s_draw.text((20, 20), status.upper(), fill=verdict_color)
+    # 4. Centered Headers
+    d.text((230, 200), "VERIFICATION REPORT", fill=(0, 0, 0), font_size=30)
+    d.text((180, 240), "TIMMYTECH EDUCATION ADMISSION SYSTEM", fill=(0, 0, 0), font_size=20)
     
-    # Rotate the stamp and paste
-    stamp_layer = stamp_layer.rotate(20, expand=True)
-    img.paste(stamp_layer, (450, 700), stamp_layer)
+    # 5. Metadata Grid (Balanced)
+    d.text((100, 300), f"NAME: {name.upper()}", fill=(0, 0, 0))
+    d.text((450, 300), f"REPORT NO: {report_id}", fill=(0, 0, 0))
+    d.text((100, 330), f"SESSION: 2025/2026", fill=(0, 0, 0))
+    d.text((450, 330), f"DATE: {issue_date}", fill=(0, 0, 0))
+    d.line((100, 360, 700, 360), fill=(0, 0, 0), width=2)
 
-    # Footer
-    d.text((250, 920), "Verified by Timmytech Education Systems", fill=(100, 100, 100))
+    # 6. Performance Summary Table
+    d.text((250, 390), "SCORES OF EXAMINATION LISTED BELOW:", fill=(0, 0, 0))
+    d.rectangle([100, 420, 700, 650], outline=(0, 0, 0), width=2)
+    d.text((120, 440), "SUBJECTS", fill=(0, 0, 0))
+    d.text((400, 440), "ACHIEVED SCORES", fill=(0, 0, 0))
+    d.text((600, 440), "FULL SCORE", fill=(0, 0, 0))
+    
+    d.text((120, 480), "JAMB (UTME)", fill=(0, 0, 0))
+    d.text((400, 480), str(jamb), fill=(0, 0, 0))
+    d.text((600, 480), "400", fill=(0, 0, 0))
+    
+    d.text((120, 520), "O-LEVEL POINTS", fill=(0, 0, 0))
+    d.text((400, 520), str(olevel), fill=(0, 0, 0))
+    d.text((600, 520), "30", fill=(0, 0, 0))
+    
+    d.text((120, 560), "INTERVIEW", fill=(0, 0, 0))
+    d.text((400, 560), str(intv), fill=(0, 0, 0))
+    d.text((600, 560), "100", fill=(0, 0, 0))
+
+    # 7. Rubber Stamp Effect (The "Official" look)
+    stamp = Image.new('RGBA', (200, 100), (255, 255, 255, 0))
+    s_draw = ImageDraw.Draw(stamp)
+    color = (0, 100, 0, 120) if "QUALIFIED" in status else (150, 0, 0, 120)
+    s_draw.text((10, 10), status.upper(), fill=color)
+    stamp = stamp.rotate(25, expand=True)
+    img.paste(stamp, (450, 750), stamp)
+
+    # 8. Disclaimer Footer
+    d.text((150, 900), "Verification report can be verified online at: https://timmytech.app", fill=(0, 0, 0))
 
     card_path = "official_result_card.png"
     img.save(card_path)
     return card_path
+        
         
 
 def create_shareable_card(name, status, jamb, olevel, intv):
