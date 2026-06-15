@@ -234,15 +234,11 @@ with st.sidebar:
 
 
 # --- 5. PAGE LOGIC ---
+
+# --- 5. PAGE LOGIC ---
 if page == "Dashboard":
     st.title("Welcome to Timmytech Admission Forecast System")
-    st.image("https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2000", use_container_width=True)
-    if len(st.session_state.history) > 0:
-        df = pd.DataFrame(st.session_state.history)
-        c1, c2, c3 = st.columns(3)
-        c1.metric("Total Forecasts", len(df))
-        c2.metric("Success Rate", f"{(len(df[df['status'].str.contains('QUALIFIED')])/len(df))*100:.1f}%")
-        c3.metric("Avg Probability", f"{df['prob'].mean()*100:.1f}%")
+    # ... (Keep your Dashboard code here) ...
 
 elif page == "Admission Forecast":
     st.title(translations[lang]["title"])
@@ -288,6 +284,7 @@ elif page == "Admission Forecast":
                         
                         save_data(name, status, f"{prob:.1%}", str(jamb), str(olevel), str(intv))
                         
+                        # Store in session state so it persists
                         st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv}
                         st.session_state.history.append(st.session_state.last_result)
                         st.rerun() 
@@ -295,69 +292,33 @@ elif page == "Admission Forecast":
                         st.error(f"⚠️ A glitch occurred: {e}")
                         st.session_state.last_result = None
 
+    # 2. THE RESULT DISPLAY (Must be outside the button, but check if result exists)
+    if "last_result" in st.session_state and st.session_state.last_result:
+        res = st.session_state.last_result
+        with col1:
+            if res['prob'] >= 0.5:
+                st.success(f"Success! {res['status']}")
+                if 'create_shareable_card' in globals():
+                    try:
+                        card_path = create_shareable_card(res['name'], res['status'], res['jamb'], res['olevel'], res['intv'])
+                        if card_path and os.path.exists(card_path):
+                            with open(card_path, "rb") as file:
+                                st.download_button("📸 Download Result Card!", file, "official_result_card.png", "image/png")
+                    except Exception as e:
+                        st.error(f"Could not generate card: {e}")
+            else:
+                st.toast('Keep pushing!', icon='💪')
+                st.warning(f"Result: {res['status']}")
         
-    
-        # 2. THE RESULT DISPLAY (Inside col1, under the button)
-
-# 1. Define the variables based on your model's output
-# (Ensure these variables are defined in your code before this block)
-st.session_state.last_result = {
-    "name": name, 
-    "status": status, 
-    "prob": prob, 
-    "jamb": jamb, 
-    "olevel": olevel, 
-    "intv": intv
-}
-
-# 2. Extract the result from session state
-res = st.session_state.last_result
-
-# 3. Display the result and the download button
-if res['prob'] >= 0.5:
-    st.success(f"Success! {res['status']}")
-    
-    # Check if the function exists in the current environment
-    if 'create_shareable_card' in globals():
-        try:
-            # Generate the card
-            card_path = create_shareable_card(
-                res['name'], 
-                res['status'], 
-                res['jamb'], 
-                res['olevel'], 
-                res['intv']
-            )
-            
-            # Offer download if card exists
-            if card_path and os.path.exists(card_path):
-                with open(card_path, "rb") as file:
-                    st.download_button(
-                        label="📸 Download Result Card to share!", 
-                        data=file, 
-                        file_name="official_result_card.png", 
-                        mime="image/png"
-                    )
-        except Exception as e:
-            st.error(f"Could not generate card: {e}")
-    else:
-        st.warning("Result card generator is not currently available.")
-else:
-    st.toast('Keep pushing! Your roadmap shows you have potential!', icon='💪')
-    st.warning(f"Result: {res['status']}")
-    
-    with col2:
-        if "last_result" in st.session_state and st.session_state.last_result:
-            res = st.session_state.last_result
+        with col2:
             st.subheader(translations[lang]["roadmap"])
             tips = get_roadmap(res['jamb'], res['olevel'])
-            for tip in tips:
-                st.info(tip)
+            for tip in tips: st.info(tip)
             st.info(f"🚀 **Insight Summary:** Focus on {'Interview skills' if res['intv'] < 60 else 'academic subjects'}.")
-            
             df_plot = pd.DataFrame({"Metric": ["JAMB", "O-Level", "INT"], "Score": [res['jamb']/4, res['olevel'], res['intv']]})
             fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
             st.plotly_chart(fig, use_container_width=True)
+
 
 elif page == "Bulk Forecast":
     st.title("📂 Bulk Applicant Processing")
