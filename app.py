@@ -17,6 +17,7 @@ def load_user_from_sheet(user_id=None):
         return []
 
 # 2. Call it properly
+
 if 'history' not in st.session_state:
     # If you have a logged-in user, pass their ID; otherwise pass None
     st.session_state.history = load_user_from_sheet() 
