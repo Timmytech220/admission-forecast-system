@@ -233,12 +233,35 @@ with st.sidebar:
 
 
 
-# --- 5. PAGE LOGIC ---
 
 # --- 5. PAGE LOGIC ---
-if page == "Dashboard":
+elif page == "Dashboard":
     st.title("Welcome to Timmytech Admission Forecast System")
-    # ... (Keep your Dashboard code here) ...
+    
+    # 1. Add the dashboard image back
+    st.image("https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2000", 
+             caption="Admission Excellence", 
+             use_container_width=True) # Makes the image responsive to your screen size
+
+    # 2. Add professional metrics if data exists
+    if len(st.session_state.history) > 0:
+        df = pd.DataFrame(st.session_state.history)
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Total Forecasts", len(df))
+        c2.metric("Success Rate", f"{(len(df[df['status'].str.contains('QUALIFIED')])/len(df))*100:.1f}%")
+        c3.metric("Avg Probability", f"{df['prob'].mean()*100:.1f}%")
+
+        # 3. Add a professional Bar Chart using Plotly
+        st.subheader("Performance Overview")
+        status_counts = df['status'].value_counts().reset_index()
+        status_counts.columns = ['Status', 'Count']
+        
+        fig = px.bar(status_counts, x='Status', y='Count', color='Status', 
+                     title="Admission Status Distribution")
+        st.plotly_chart(fig, use_container_width=True) # Makes chart interactive
+    else:
+        st.info("No forecast data available yet. Head over to 'Admission Forecast' to start!")
+        
 
 elif page == "Admission Forecast":
     st.title(translations[lang]["title"])
