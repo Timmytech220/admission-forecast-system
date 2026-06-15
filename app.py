@@ -5,32 +5,22 @@ import joblib
 import os
 
 
-def load_user_from_sheet(user_id):
+# 1. Update the function to handle missing user_id
+def load_user_from_sheet(user_id=None):
     try:
-        # Assuming you use st.connection for your Google Sheets
         conn = st.connection("gsheets", type="gsheets")
-        df = conn.read(worksheet="Sheet1") # Replace 'Sheet1' with your actual sheet name
-        user_data = df[df['id'] == user_id]
-        return user_data
+        df = conn.read(worksheet="Sheet1")
+        if user_id:
+            df = df[df['id'] == user_id]
+        return df.to_dict('records')
     except Exception as e:
-        return None
+        return []
 
-# Check for a user session in the URL
-if "user_id" in query_params:
-    user_id = query_params["user_id"]
-    if "loaded_user" not in st.session_state:
-        st.session_state.loaded_user = load_user_from_sheet(user_id)
-        
-        # If we found the user, fill their info into session_state automatically
-        if st.session_state.loaded_user is not None and not st.session_state.loaded_user.empty:
-            st.toast(f"Welcome back, {user_id}! Loading your data... 📂", icon="✨")
-            # You would map your columns here: 
-            # st.session_state.name = st.session_state.loaded_user['name'].iloc[0]
-
-
+# 2. Call it properly
 if 'history' not in st.session_state:
-    # This function should fetch your data from Google Sheets
+    # If you have a logged-in user, pass their ID; otherwise pass None
     st.session_state.history = load_user_from_sheet() 
+    
     
 
 from PIL import Image, ImageDraw, ImageFont # You may need to install Pillow
@@ -397,11 +387,17 @@ elif page == "Bulk Forecast":
         except Exception as e:
             st.error(f"Error processing file: {e}. Please ensure your CSV is properly formatted.")
             
-
 elif page == "History Log":
-    st.title("📋 Prediction History")
-    if st.session_state.history: st.dataframe(pd.DataFrame(st.session_state.history), use_container_width=True)
-    else: st.write("No records yet.")
+    st.title("📜 Prediction History")
+
+    if st.session_state.history:
+        df = pd.DataFrame(st.session_state.history)
+        st.dataframe(df)
+    else:
+        st.info("No records found in your database.")
+        
+
+
 elif page == "Export Reports":
     st.title("🖨️ Export Official Reports")
     
