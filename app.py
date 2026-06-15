@@ -5,7 +5,7 @@ import joblib
 import os
 from PIL import Image, ImageDraw, ImageFont # You may need to install Pillow
 
-  def create_shareable_card(name, status, jamb, olevel, intv):
+def create_shareable_card(name, status, jamb, olevel, intv):
     width, height = 800, 500
     # Create a clean white background
     img = Image.new('RGB', (width, height), color=(255, 255, 255))
