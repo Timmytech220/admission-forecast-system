@@ -28,6 +28,8 @@ if 'history' not in st.session_state:
     
     
 
+
+
 def create_shareable_card(name, status, jamb, olevel, intv):
     # 1. Generate Metadata
     report_id = f"TT-{uuid.uuid4().hex[:8].upper()}"
@@ -37,35 +39,47 @@ def create_shareable_card(name, status, jamb, olevel, intv):
     img = Image.new('RGB', (width, height), color=(255, 255, 255))
     d = ImageDraw.Draw(img)
 
-    # 2. Add Header & Official Branding
-    d.rectangle([0, 0, 800, 150], fill=(0, 51, 102))
-    d.text((50, 40), "OFFICIAL ADMISSION VERIFICATION REPORT", fill=(255, 255, 255))
-    
-    # 3. Add Verification Metadata (The official look)
-    d.text((50, 170), f"REPORT NO: {report_id}", fill=(0, 0, 0))
-    d.text((50, 200), f"ISSUE DATE: {issue_date}", fill=(0, 0, 0))
-    d.line((50, 230, 750, 230), fill=(0, 0, 0), width=2)
-    
-    # 4. Create a Formal Grid for Scores
-    d.text((50, 260), "APPLICANT IDENTITY:", fill=(0, 51, 102))
-    d.text((50, 290), f"NAME: {name.upper()}", fill=(0, 0, 0))
-    
-    # Draw the Score Box (The "Table" look)
-    d.rectangle([50, 350, 750, 600], outline=(0, 51, 102), width=2)
-    d.text((70, 370), "ACADEMIC PERFORMANCE SUMMARY", fill=(0, 51, 102))
-    d.text((70, 420), f"JAMB SCORE: {jamb}", fill=(0, 0, 0))
-    d.text((70, 460), f"O-LEVEL PTS: {olevel}", fill=(0, 0, 0))
-    d.text((70, 500), f"INTERVIEW: {intv}", fill=(0, 0, 0))
-    
-    # 5. Final Verdict (The "Stamp of Authority")
-    verdict_color = (0, 128, 0) if "QUALIFIED" in status else (178, 34, 34)
-    d.rectangle([50, 700, 750, 850], fill=(240, 240, 240))
-    d.text((250, 730), "ADMISSION STATUS", fill=(0, 51, 102))
-    d.text((250, 770), status.upper(), fill=verdict_color)
+    # 2. Add Decorative Border (Certificate style)
+    d.rectangle([20, 20, 780, 980], outline=(0, 51, 102), width=5)
 
+    # 3. Add Your Logo (Automatically pulls from 'logo.png' in your repo)
+    try:
+        logo = Image.open("logo.png").convert("RGBA")
+        logo = logo.resize((150, 150))
+        img.paste(logo, (325, 40), logo)
+    except:
+        d.text((325, 100), "TIMMYTECH", fill=(0, 51, 102))
+
+    # 4. Header & Title
+    d.text((150, 220), "OFFICIAL ADMISSION VERIFICATION REPORT", fill=(0, 51, 102))
+    d.line((100, 250, 700, 250), fill=(0, 51, 102), width=3)
+
+    # 5. Metadata (Report ID and Date)
+    d.text((100, 280), f"REPORT NO: {report_id}", fill=(0, 0, 0))
+    d.text((100, 310), f"ISSUE DATE: {issue_date}", fill=(0, 0, 0))
+
+    # 6. Applicant Identity Section
+    d.text((100, 370), "APPLICANT IDENTITY:", fill=(0, 51, 102))
+    d.text((100, 400), f"NAME: {name.upper()}", fill=(0, 0, 0))
+
+    # 7. Academic Performance Summary (Grid Style)
+    d.rectangle([100, 460, 700, 660], outline=(0, 51, 102), width=2)
+    d.text((120, 480), "ACADEMIC PERFORMANCE SUMMARY", fill=(0, 51, 102))
+    d.text((120, 530), f"JAMB SCORE:    {jamb}", fill=(0, 0, 0))
+    d.text((120, 570), f"O-LEVEL PTS:   {olevel}", fill=(0, 0, 0))
+    d.text((120, 610), f"INTERVIEW:     {intv}", fill=(0, 0, 0))
+
+    # 8. Admission Status Verdict Box
+    verdict_color = (0, 128, 0) if "QUALIFIED" in status else (178, 34, 34)
+    d.rectangle([100, 720, 700, 820], fill=(240, 240, 240))
+    d.text((300, 740), "ADMISSION STATUS", fill=(0, 51, 102))
+    d.text((300, 780), status.upper(), fill=verdict_color)
+
+    # Save
     card_path = "official_result_card.png"
     img.save(card_path)
     return card_path
+    
     
 # --- 1. THE PERSISTENCE HOOK (Must be at the top) ---
 query_params = st.query_params
