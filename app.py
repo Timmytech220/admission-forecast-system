@@ -6,8 +6,6 @@ import os
 import uuid
 from datetime import datetime
 from PIL import Image, ImageDraw
-import uuid
-from datetime import datetime
 
 
 
