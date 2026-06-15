@@ -263,9 +263,7 @@ if page == "Dashboard":
         st.info("No forecast data available yet. Head over to 'Admission Forecast' to start!")
 
 
-        
-
-elif page == "Admission Forecast":
+   elif page == "Admission Forecast":
     st.title(translations[lang]["title"])
     col1, col2 = st.columns([1, 1])
     
@@ -308,8 +306,6 @@ elif page == "Admission Forecast":
                         status = f"{status_text} ({prob:.1%})"
                         
                         save_data(name, status, f"{prob:.1%}", str(jamb), str(olevel), str(intv))
-                        
-                        # Store in session state so it persists
                         st.session_state.last_result = {"name": name, "status": status, "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv}
                         st.session_state.history.append(st.session_state.last_result)
                         st.rerun() 
@@ -317,48 +313,36 @@ elif page == "Admission Forecast":
                         st.error(f"⚠️ A glitch occurred: {e}")
                         st.session_state.last_result = None
 
-    # 2. THE RESULT DISPLAY (Must be outside the button, but check if result exists)
-    
-if "last_result" in st.session_state and st.session_state.last_result:
-    res = st.session_state.last_result
-    
-    with col1:
-        # 1. Status Message
-        if res['prob'] >= 0.5:
-            st.success(f"Success! {res['status']}")
-        else:
-            st.toast('Keep pushing!', icon='💪')
-            st.warning(f"Result: {res['status']}")
+    # 2. THE RESULT DISPLAY (Must be INSIDE the elif page block to access col1 and col2)
+    if "last_result" in st.session_state and st.session_state.last_result:
+        res = st.session_state.last_result
         
-        # 2. Download Button (Now visible for EVERYONE)
-        if 'create_shareable_card' in globals():
-            try:
-                card_path = create_shareable_card(res['name'], res['status'], res['jamb'], res['olevel'], res['intv'])
-                if card_path and os.path.exists(card_path):
-                    with open(card_path, "rb") as file:
-                        st.download_button(
-                            label="📸 Download Result Card!", 
-                            data=file, 
-                            file_name="official_result_card.png", 
-                            mime="image/png"
-                        )
-            except Exception as e:
-                st.error(f"Could not generate card: {e}")
-        else:
-            st.warning("Result card generator is not currently available.")
-    
-    with col2:
-        # 3. Roadmap and Charts
-        st.subheader(translations[lang]["roadmap"])
-        tips = get_roadmap(res['jamb'], res['olevel'])
-        for tip in tips: 
-            st.info(tip)
+        with col1:
+            if res['prob'] >= 0.5:
+                st.success(f"Success! {res['status']}")
+            else:
+                st.toast('Keep pushing!', icon='💪')
+                st.warning(f"Result: {res['status']}")
+            
+            if 'create_shareable_card' in globals():
+                try:
+                    card_path = create_shareable_card(res['name'], res['status'], res['jamb'], res['olevel'], res['intv'])
+                    if card_path and os.path.exists(card_path):
+                        with open(card_path, "rb") as file:
+                            st.download_button("📸 Download Result Card!", file, "official_result_card.png", "image/png")
+                except Exception as e:
+                    st.error(f"Could not generate card: {e}")
         
-        st.info(f"🚀 **Insight Summary:** Focus on {'Interview skills' if res['intv'] < 60 else 'academic subjects'}.")
-        
-        df_plot = pd.DataFrame({"Metric": ["JAMB", "O-Level", "INT"], "Score": [res['jamb']/4, res['olevel'], res['intv']]})
-        fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
-        st.plotly_chart(fig, use_container_width=True)
+        with col2:
+            st.subheader(translations[lang]["roadmap"])
+            tips = get_roadmap(res['jamb'], res['olevel'])
+            for tip in tips: st.info(tip)
+            st.info(f"🚀 **Insight Summary:** Focus on {'Interview skills' if res['intv'] < 60 else 'academic subjects'}.")
+            df_plot = pd.DataFrame({"Metric": ["JAMB", "O-Level", "INT"], "Score": [res['jamb']/4, res['olevel'], res['intv']]})
+            fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
+            st.plotly_chart(fig, use_container_width=True)
+
+
                                                   
 
 elif page == "Bulk Forecast":
