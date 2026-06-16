@@ -258,25 +258,54 @@ if "history" not in st.session_state: st.session_state.history = []
 if "last_result" not in st.session_state: st.session_state.last_result = None
 
 
-# --- 4. SIDEBAR ---
 
+
+# --- 4. SIDEBAR ---
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2942/2942813.png", width=80) 
     st.markdown("## Timmytech Console")
     
-    # Language Picker: Automatically pulls all keys (English, Hausa, French, Yoruba, Igbo)
+    # 1. Admin System Health Monitor
+    user_role = st.session_state.get("role", "Student")
+    if user_role == "Admin":
+        st.markdown("🟢 **System Online**")
+    
+    # Language Picker
     lang = st.selectbox("🌍 Select Language", list(translations.keys()))
     
-    # Dynamic navigation based on the selected language
-    page = st.radio(
-        translations[lang]["nav_title"], 
-        ["Dashboard", "Admission Forecast", "Bulk Forecast", "History Log", "Export Reports", "Help & Support"]
-    )
+    # 2. DYNAMIC NAVIGATION WITH NOTIFICATION BADGE
+    # Check if there is a pending update for the student
+    has_update = st.session_state.get("new_update", False)
+    history_label = "History Log 🔔" if (has_update and user_role == "Student") else "History Log"
+    
+    if user_role == "Admin":
+        nav_options = ["Dashboard", "Admission Forecast", "Bulk Forecast", "History Log", "Export Reports", "Help & Support"]
+    else:
+        nav_options = ["Admission Forecast", history_label, "Help & Support"]
+    
+    page = st.radio(translations[lang]["nav_title"], nav_options)
+    
+    # Reset notification badge if they click on the history log
+    if "History Log" in page:
+        st.session_state.new_update = False
     
     st.divider()
+    
+    # 3. Contextual Sidebar Actions
+    if user_role == "Admin":
+        if st.button("📥 Export All Data (CSV)"):
+            st.success("Downloading...")
+            
+    elif user_role == "Student":
+        if st.session_state.get('last_result') == "QUALIFIED":
+            st.info("🎉 You are Qualified!")
+            if st.button("📄 Download Official Letter"):
+                st.balloons()
+    
+    st.divider()
+    st.write(f"Role: **{user_role}**")
     st.write("Developed by: **Ajayi Oluwatimileyin Daniel**")
     
-
 
 
 
