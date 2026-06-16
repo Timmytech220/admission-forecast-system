@@ -5,7 +5,7 @@ import joblib
 import os
 import uuid
 from datetime import datetime
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 
 
