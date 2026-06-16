@@ -27,124 +27,81 @@ if 'history' not in st.session_state:
     st.session_state.history = load_user_from_sheet() 
     
     
+from PIL import Image, ImageDraw, ImageFont
+import uuid
+from datetime import datetime
 
 def create_shareable_card(name, status, jamb, olevel, intv):
     # 1. Setup
     report_id = f"TT-{uuid.uuid4().hex[:8].upper()}"
     issue_date = datetime.now().strftime("%d-%m-%Y")
-    width, height = 800, 1000
-    img = Image.new('RGB', (width, height), color=(250, 255, 250)) # Soft green tint
+    
+    # Background: Official light green
+    img = Image.new('RGB', (800, 1000), color=(240, 248, 230)) 
     d = ImageDraw.Draw(img)
-
-    # 2. Border: Professional "Certificate" style
-    d.rectangle([20, 20, 780, 980], outline=(40, 100, 40), width=15)
-    d.rectangle([40, 40, 760, 960], outline=(40, 100, 40), width=2)
-
-    # 3. Logo (Centered)
+    
+    # Load fonts (Ensure arial.ttf exists in your directory)
     try:
-        logo = Image.open("logo.png").convert("RGBA")
-        logo = logo.resize((120, 120))
-        img.paste(logo, (340, 60), logo)
+        title_font = ImageFont.truetype("arial.ttf", 36)
+        text_font = ImageFont.truetype("arial.ttf", 24)
     except:
-        pass
-
-    # 4. Centered Headers
-    d.text((230, 200), "VERIFICATION REPORT", fill=(0, 0, 0), font_size=30)
-    d.text((180, 240), "TIMMYTECH EDUCATION ADMISSION SYSTEM", fill=(0, 0, 0), font_size=20)
+        title_font = ImageFont.load_default()
+        text_font = ImageFont.load_default()
     
-    # 5. Metadata Grid (Balanced)
-    d.text((100, 300), f"NAME: {name.upper()}", fill=(0, 0, 0))
-    d.text((450, 300), f"REPORT NO: {report_id}", fill=(0, 0, 0))
-    d.text((100, 330), f"SESSION: 2025/2026", fill=(0, 0, 0))
-    d.text((450, 330), f"DATE: {issue_date}", fill=(0, 0, 0))
-    d.line((100, 360, 700, 360), fill=(0, 0, 0), width=2)
-
-    # 6. Performance Summary Table
-    d.text((250, 390), "SCORES OF EXAMINATION LISTED BELOW:", fill=(0, 0, 0))
-    d.rectangle([100, 420, 700, 650], outline=(0, 0, 0), width=2)
-    d.text((120, 440), "SUBJECTS", fill=(0, 0, 0))
-    d.text((400, 440), "ACHIEVED SCORES", fill=(0, 0, 0))
-    d.text((600, 440), "FULL SCORE", fill=(0, 0, 0))
+    # 2. Decorative Green Border
+    d.rectangle([20, 20, 780, 980], outline=(34, 139, 34), width=10)
     
-    d.text((120, 480), "JAMB (UTME)", fill=(0, 0, 0))
-    d.text((400, 480), str(jamb), fill=(0, 0, 0))
-    d.text((600, 480), "400", fill=(0, 0, 0))
-    
-    d.text((120, 520), "O-LEVEL POINTS", fill=(0, 0, 0))
-    d.text((400, 520), str(olevel), fill=(0, 0, 0))
-    d.text((600, 520), "30", fill=(0, 0, 0))
-    
-    d.text((120, 560), "INTERVIEW", fill=(0, 0, 0))
-    d.text((400, 560), str(intv), fill=(0, 0, 0))
-    d.text((600, 560), "100", fill=(0, 0, 0))
-
-    # 7. Rubber Stamp Effect (The "Official" look)
-    stamp = Image.new('RGBA', (200, 100), (255, 255, 255, 0))
-    s_draw = ImageDraw.Draw(stamp)
-    color = (0, 100, 0, 120) if "QUALIFIED" in status else (150, 0, 0, 120)
-    s_draw.text((10, 10), status.upper(), fill=color)
-    stamp = stamp.rotate(25, expand=True)
-    img.paste(stamp, (450, 750), stamp)
-
-    # 8. Disclaimer Footer
-    d.text((150, 900), "Verification report can be verified online at: https://timmytech.app", fill=(0, 0, 0))
-
-    card_path = "official_result_card.png"
-    img.save(card_path)
-    return card_path
-        
-        
-
-def create_shareable_card(name, status, jamb, olevel, intv):
-    # 1. Generate Metadata
-    report_id = f"TT-{uuid.uuid4().hex[:8].upper()}"
-    issue_date = datetime.now().strftime("%d-%m-%Y")
-    
-    width, height = 800, 1000
-    img = Image.new('RGB', (width, height), color=(255, 255, 255))
-    d = ImageDraw.Draw(img)
-
-    # 2. Add Decorative Border (Certificate style)
-    d.rectangle([20, 20, 780, 980], outline=(0, 51, 102), width=5)
-
-    # 3. Add Your Logo (Automatically pulls from 'logo.png' in your repo)
+    # 3. Logo (Centered with transparency handling)
     try:
         logo = Image.open("logo.png").convert("RGBA")
         logo = logo.resize((150, 150))
         img.paste(logo, (325, 40), logo)
     except:
-        d.text((325, 100), "TIMMYTECH", fill=(0, 51, 102))
+        d.text((325, 100), "LOGO", font=title_font, fill=(34, 139, 34))
 
-    # 4. Header & Title
-    d.text((150, 220), "OFFICIAL ADMISSION VERIFICATION REPORT", fill=(0, 51, 102))
-    d.line((100, 250, 700, 250), fill=(0, 51, 102), width=3)
+    # 4. Header Section
+    d.text((250, 210), "VERIFICATION REPORT", font=title_font, fill=(0, 0, 0))
+    d.text((180, 250), "China College Admission Examination Scores", font=text_font, fill=(0, 0, 0))
+    
+    # 5. Metadata Grid (Using y_cursor for spacing)
+    y = 320
+    d.text((100, y), f"Name: {name}", font=text_font, fill=(0, 0, 0))
+    d.text((450, y), f"Report No.: {report_id}", font=text_font, fill=(0, 0, 0))
+    y += 40
+    d.text((100, y), f"Date of Report: {issue_date}", font=text_font, fill=(0, 0, 0))
+    
+    # 6. Performance Summary Table
+    y += 60
+    d.text((100, y), "Scores of examination listed below:", font=text_font, fill=(0, 0, 0))
+    
+    y += 40
+    d.rectangle([100, y, 700, y + 40], outline=(34, 139, 34), fill=(220, 235, 210))
+    d.text((120, y + 5), "SUBJECT", font=text_font, fill=(0, 0, 0))
+    d.text((400, y + 5), "SCORE", font=text_font, fill=(0, 0, 0))
+    d.text((600, y + 5), "FULL", font=text_font, fill=(0, 0, 0))
+    
+    # Table Content
+    y += 50
+    items = [("JAMB (UTME)", str(jamb), "400"), ("O-LEVEL", str(olevel), "30"), ("INTERVIEW", str(intv), "100")]
+    for sub, score, full in items:
+        d.text((120, y), sub, font=text_font, fill=(0, 0, 0))
+        d.text((400, y), score, font=text_font, fill=(0, 0, 0))
+        d.text((600, y), full, font=text_font, fill=(0, 0, 0))
+        y += 50 # Increased spacing as requested
 
-    # 5. Metadata (Report ID and Date)
-    d.text((100, 280), f"REPORT NO: {report_id}", fill=(0, 0, 0))
-    d.text((100, 310), f"ISSUE DATE: {issue_date}", fill=(0, 0, 0))
-
-    # 6. Applicant Identity Section
-    d.text((100, 370), "APPLICANT IDENTITY:", fill=(0, 51, 102))
-    d.text((100, 400), f"NAME: {name.upper()}", fill=(0, 0, 0))
-
-    # 7. Academic Performance Summary (Grid Style)
-    d.rectangle([100, 460, 700, 660], outline=(0, 51, 102), width=2)
-    d.text((120, 480), "ACADEMIC PERFORMANCE SUMMARY", fill=(0, 51, 102))
-    d.text((120, 530), f"JAMB SCORE:    {jamb}", fill=(0, 0, 0))
-    d.text((120, 570), f"O-LEVEL PTS:   {olevel}", fill=(0, 0, 0))
-    d.text((120, 610), f"INTERVIEW:     {intv}", fill=(0, 0, 0))
-
-    # 8. Admission Status Verdict Box
-    verdict_color = (0, 128, 0) if "QUALIFIED" in status else (178, 34, 34)
-    d.rectangle([100, 720, 700, 820], fill=(240, 240, 240))
-    d.text((300, 740), "ADMISSION STATUS", fill=(0, 51, 102))
-    d.text((300, 780), status.upper(), fill=verdict_color)
-
-    # Save
+    # 7. Stamp Effect
+    status_text = status.upper()
+    d.text((450, 750), status_text, font=title_font, fill=(200, 0, 0))
+    
+    # 8. Disclaimer
+    d.text((150, 920), "Verification report can be verified online at: https://yourdomain.com", font=text_font, fill=(0, 0, 0))
+    
     card_path = "official_result_card.png"
     img.save(card_path)
     return card_path
     
+
+        
     
 # --- 1. THE PERSISTENCE HOOK (Must be at the top) ---
 query_params = st.query_params
