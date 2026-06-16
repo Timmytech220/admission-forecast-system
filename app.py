@@ -13,6 +13,7 @@ import io
 
 
 # 1. Fixed Syntax: Corrected function definition line
+
 def load_user_from_sheet(user_id=None):
     try:
         conn = st.connection("gsheets", type="gsheets")
