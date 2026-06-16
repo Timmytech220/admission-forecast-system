@@ -283,29 +283,44 @@ with st.sidebar:
 if page == "Dashboard":
     st.title("Welcome to Timmytech Admission Forecast System")
     
-    # 1. Add the dashboard image
+    # Professional Header Image
     st.image("https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2000", 
              caption="Admission Excellence", 
              use_container_width=True)
 
-    # 2. Add professional metrics if data exists
-    if len(st.session_state.history) > 0:
+    # Check if data exists in session state
+    elif 'history' in st.session_state and len(st.session_state.history) > 0:
         df = pd.DataFrame(st.session_state.history)
-        c1, c2, c3 = st.columns(3)
-        c1.metric("Total Forecasts", len(df))
-        c2.metric("Success Rate", f"{(len(df[df['status'].str.contains('QUALIFIED')])/len(df))*100:.1f}%")
-        c3.metric("Avg Probability", f"{df['prob'].mean()*100:.1f}%")
-
-        # 3. Add a professional Bar Chart using Plotly
-        st.subheader("Performance Overview")
-        status_counts = df['status'].value_counts().reset_index()
-        status_counts.columns = ['Status', 'Count']
         
-        fig = px.bar(status_counts, x='Status', y='Count', color='Status', 
-                     title="Admission Status Distribution")
-        st.plotly_chart(fig, use_container_width=True)
+        # Ensure 'Status' and 'Probability' columns exist for the metrics
+        # Adjust column names here if your spreadsheet uses different headers
+        try:
+            total = len(df)
+            qualified = len(df[df['Status'].str.upper() == 'QUALIFIED'])
+            success_rate = (qualified / total) * 100
+            
+            # KPI Metrics Row
+            c1, c2, c3 = st.columns(3)
+            c1.metric("Total Forecasts", total)
+            c2.metric("Success Rate", f"{success_rate:.1f}%")
+            c3.metric("Avg Score", f"{df['jamb_score'].mean():.1f}" if 'jamb_score' in df.columns else "N/A")
+
+            # 3. Professional Performance Chart
+            st.subheader("Performance Overview")
+            status_counts = df['Status'].value_counts().reset_index()
+            status_counts.columns = ['Status', 'Count']
+            
+            fig = px.bar(status_counts, x='Status', y='Count', color='Status', 
+                         color_discrete_map={'QUALIFIED': '#002060', 'NOT QUALIFIED': '#BF9000'},
+                         title="Admission Status Distribution")
+            fig.update_layout(xaxis_title="Status", yaxis_title="Number of Applicants")
+            st.plotly_chart(fig, use_container_width=True)
+            
+        except Exception as e:
+            st.warning("Data format issue: Ensure your history data has 'Status' and 'jamb_score' columns.")
     else:
         st.info("No forecast data available yet. Head over to 'Admission Forecast' to start!")
+        
 
 elif page == "Admission Forecast":
     st.title(translations[lang]["title"])
