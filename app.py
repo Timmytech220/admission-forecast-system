@@ -288,12 +288,11 @@ if page == "Dashboard":
              caption="Admission Excellence", 
              use_container_width=True)
 
-    # Check if data exists in session state
-    elif 'history' in st.session_state and len(st.session_state.history) > 0:
+    # Corrected: Use 'if' here, not 'elif', because we are inside the 'if page == "Dashboard"' block
+    if 'history' in st.session_state and len(st.session_state.history) > 0:
         df = pd.DataFrame(st.session_state.history)
         
         # Ensure 'Status' and 'Probability' columns exist for the metrics
-        # Adjust column names here if your spreadsheet uses different headers
         try:
             total = len(df)
             qualified = len(df[df['Status'].str.upper() == 'QUALIFIED'])
@@ -317,7 +316,7 @@ if page == "Dashboard":
             st.plotly_chart(fig, use_container_width=True)
             
         except Exception as e:
-            st.warning("Data format issue: Ensure your history data has 'Status' and 'jamb_score' columns.")
+            st.warning(f"Data format issue: {e}")
     else:
         st.info("No forecast data available yet. Head over to 'Admission Forecast' to start!")
         
