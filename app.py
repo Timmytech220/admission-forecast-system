@@ -372,7 +372,6 @@ elif page == "Admission Forecast":
 
 
 # ... (rest of your existing imports) ...
-
 elif page == "Bulk Forecast":
     st.title("📂 Bulk Applicant Processing")
     st.write("Upload a CSV file containing columns: `name`, `jamb_score`, `olevel_points`, `interview_score`.")
@@ -395,10 +394,14 @@ elif page == "Bulk Forecast":
                     predictions = pipeline.predict(df_to_predict[['jamb_score', 'waec_points', 'interview_score']])
                     df['Status'] = ['QUALIFIED' if p >= 0.5 else 'NOT QUALIFIED' for p in predictions]
                     
-                    # 2. ZIP Creation (In-Memory)
+                    # 2. Display the result table immediately
+                    st.write("### ✅ Processed Results:")
+                    st.dataframe(df)
+                    
+                    # 3. ZIP Creation (In-Memory)
                     zip_buffer = io.BytesIO()
                     with zipfile.ZipFile(zip_buffer, "w") as zf:
-                        with st.spinner("Generating student cards..."):
+                        with st.spinner("Generating and zipping student cards..."):
                             for index, row in df.iterrows():
                                 # Generate the card
                                 card_path = create_shareable_card(
@@ -416,10 +419,10 @@ elif page == "Bulk Forecast":
                     
                     st.success("Processing Complete!")
                     
-                    # 3. Download Buttons
+                    # 4. Download Buttons
                     # Download CSV
                     csv = df.to_csv(index=False).encode('utf-8')
-                    st.download_button("Download CSV Report", csv, "results.csv", "text/csv")
+                    st.download_button("📥 Download CSV Report", csv, "results.csv", "text/csv")
                     
                     # Download ZIP
                     st.download_button(
@@ -432,6 +435,7 @@ elif page == "Bulk Forecast":
                 st.error(f"Missing columns! Your file must include: {required}")
         except Exception as e:
             st.error(f"Error processing file: {e}")
+                                
         
             
 elif page == "History Log":
