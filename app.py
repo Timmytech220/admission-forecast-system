@@ -234,8 +234,11 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
+
 # --- 2. AUTHENTICATION ---
-if "logged_in" not in st.session_state: st.session_state.logged_in = False
+if "logged_in" not in st.session_state: 
+    st.session_state.logged_in = False
+    st.session_state.role = "Student" # Default
 
 if not st.session_state.logged_in:
     c1, mid, c3 = st.columns([1, 1.5, 1])
@@ -244,13 +247,24 @@ if not st.session_state.logged_in:
         st.markdown("<h2 style='text-align: center;'>🔐 Timmytech Secure Access</h2>", unsafe_allow_html=True)
         user = st.text_input("Username")
         pwd = st.text_input("Password", type="password")
+        
         if st.button("Login", use_container_width=True):
-            if user == "Timmy" and pwd == "1234":
+            # Admin Login Logic
+            if user == "Admin" and pwd == "1234":
                 st.session_state.logged_in = True
+                st.session_state.role = "Admin" 
                 st.rerun()
-            else: st.error("Invalid credentials!")
+            # Student Login Logic (Timmy)
+            elif user == "Timmy" and pwd == "1234":
+                st.session_state.logged_in = True
+                st.session_state.role = "Student"
+                st.rerun()
+            else: 
+                st.error("Invalid credentials!")
+                
         st.markdown("</div>", unsafe_allow_html=True)
     st.stop()
+    
 
 # --- 3. MODEL & STATE ---
 pipeline = joblib.load("final_pipeline.pkl")
