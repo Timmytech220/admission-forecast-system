@@ -9,8 +9,7 @@ from PIL import Image, ImageDraw
 
 
 
-# 1. Update the function to handle missing user_id
-def load_user_from_sheet(user_id=None):
+# 1. Update the function to handle missing user_iddef load_user_from_sheet(user_id=None):
     try:
         conn = st.connection("gsheets", type="gsheets")
         df = conn.read(worksheet="Sheet1")
