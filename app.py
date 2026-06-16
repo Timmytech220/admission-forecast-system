@@ -280,47 +280,58 @@ with st.sidebar:
 
 
 
+
 # --- 5. PAGE LOGIC 
 if page == "Dashboard":
     st.title("Welcome to Timmytech Admission Forecast System")
     
-    # Professional Header Image
     st.image("https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2000", 
              caption="Admission Excellence", 
              use_container_width=True)
 
-    # Corrected: Use 'if' here, not 'elif', because we are inside the 'if page == "Dashboard"' block
     if 'history' in st.session_state and len(st.session_state.history) > 0:
         df = pd.DataFrame(st.session_state.history)
         
-        # Ensure 'Status' and 'Probability' columns exist for the metrics
+        # --- DEBUG: Uncomment the line below to see your real column names ---
+        # st.write("Found columns:", df.columns.tolist()) 
+        
+        # Normalize column names to lowercase to avoid case-sensitivity issues
+        df.columns = [c.lower() for c in df.columns]
+        
         try:
             total = len(df)
-            qualified = len(df[df['Status'].str.upper() == 'QUALIFIED'])
-            success_rate = (qualified / total) * 100
+            # Use 'status' (now guaranteed lowercase)
+            qualified = len(df[df['status'].astype(str).str.upper() == 'QUALIFIED'])
+            success_rate = (qualified / total) * 100 if total > 0 else 0
             
-            # KPI Metrics Row
             c1, c2, c3 = st.columns(3)
             c1.metric("Total Forecasts", total)
             c2.metric("Success Rate", f"{success_rate:.1f}%")
-            c3.metric("Avg Score", f"{df['jamb_score'].mean():.1f}" if 'jamb_score' in df.columns else "N/A")
+            
+            # Use 'jamb_score' (now guaranteed lowercase)
+            if 'jamb_score' in df.columns:
+                c3.metric("Avg Score", f"{df['jamb_score'].mean():.1f}")
+            else:
+                c3.metric("Avg Score", "N/A")
 
-            # 3. Professional Performance Chart
             st.subheader("Performance Overview")
-            status_counts = df['Status'].value_counts().reset_index()
+            
+            # Prepare chart data
+            status_counts = df['status'].value_counts().reset_index()
             status_counts.columns = ['Status', 'Count']
             
             fig = px.bar(status_counts, x='Status', y='Count', color='Status', 
                          color_discrete_map={'QUALIFIED': '#002060', 'NOT QUALIFIED': '#BF9000'},
                          title="Admission Status Distribution")
-            fig.update_layout(xaxis_title="Status", yaxis_title="Number of Applicants")
             st.plotly_chart(fig, use_container_width=True)
             
         except Exception as e:
-            st.warning(f"Data format issue: {e}")
+            st.error(f"Error processing data: {e}")
+            st.write("Your current columns are:", df.columns.tolist())
     else:
         st.info("No forecast data available yet. Head over to 'Admission Forecast' to start!")
         
+
 
 elif page == "Admission Forecast":
     st.title(translations[lang]["title"])
