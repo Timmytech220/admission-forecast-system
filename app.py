@@ -350,18 +350,32 @@ if page == "Dashboard":
              caption="Admission Excellence", 
              use_container_width=True)
 
+    # Admin: Live Activity Stream
+    if st.session_state.get("role") == "Admin":
+        st.subheader("📡 Live Activity Stream")
+        with st.container(border=True):
+            if not st.session_state.activity_log:
+                st.caption("No recent activity.")
+            else:
+                for log in st.session_state.activity_log:
+                    st.text(log)
+    
+    # Student: Notification Center
+    elif st.session_state.get("role") == "Student":
+        st.subheader("🔔 Notification Center")
+        if not st.session_state.notifications:
+            st.info("No new notifications.")
+        else:
+            for note in st.session_state.notifications:
+                st.warning(note)
+
+    # Existing Dashboard Data Analysis Logic
     if 'history' in st.session_state and len(st.session_state.history) > 0:
         df = pd.DataFrame(st.session_state.history)
-        
-        # --- DEBUG: Uncomment the line below to see your real column names ---
-        # st.write("Found columns:", df.columns.tolist()) 
-        
-        # Normalize column names to lowercase to avoid case-sensitivity issues
         df.columns = [c.lower() for c in df.columns]
         
         try:
             total = len(df)
-            # Use 'status' (now guaranteed lowercase)
             qualified = len(df[df['status'].astype(str).str.upper() == 'QUALIFIED'])
             success_rate = (qualified / total) * 100 if total > 0 else 0
             
@@ -369,7 +383,6 @@ if page == "Dashboard":
             c1.metric("Total Forecasts", total)
             c2.metric("Success Rate", f"{success_rate:.1f}%")
             
-            # Use 'jamb_score' (now guaranteed lowercase)
             if 'jamb_score' in df.columns:
                 c3.metric("Avg Score", f"{df['jamb_score'].mean():.1f}")
             else:
@@ -377,7 +390,6 @@ if page == "Dashboard":
 
             st.subheader("Performance Overview")
             
-            # Prepare chart data
             status_counts = df['status'].value_counts().reset_index()
             status_counts.columns = ['Status', 'Count']
             
@@ -388,7 +400,6 @@ if page == "Dashboard":
             
         except Exception as e:
             st.error(f"Error processing data: {e}")
-            st.write("Your current columns are:", df.columns.tolist())
     else:
         st.info("No forecast data available yet. Head over to 'Admission Forecast' to start!")
         
