@@ -9,7 +9,9 @@ from PIL import Image, ImageDraw
 
 
 
-# 1. Update the function to handle missing user_iddef load_user_from_sheet(user_id=None):
+
+# 1. Fixed Syntax: Corrected function definition line
+def load_user_from_sheet(user_id=None):
     try:
         conn = st.connection("gsheets", type="gsheets")
         df = conn.read(worksheet="Sheet1")
@@ -20,20 +22,16 @@ from PIL import Image, ImageDraw
         return []
 
 # 2. Call it properly
-
 if 'history' not in st.session_state:
-    # If you have a logged-in user, pass their ID; otherwise pass None
     st.session_state.history = load_user_from_sheet() 
-    
-    
 
-
-def create_shareable_card(name, status, jamb, olevel, intv, total_score):
+# 3. Fixed Function: Removed total_score argument to prevent "missing argument" errors
+def create_shareable_card(name, status, jamb, olevel, intv):
     # Setup
     report_id = f"TT-{uuid.uuid4().hex[:8].upper()}"
     issue_date = datetime.now().strftime("%d-%m-%Y")
     
-    # Professional Palette: Off-white background, Navy Blue text/borders, Gold accents
+    # Professional Palette
     bg_color = (248, 249, 250)
     navy_color = (0, 32, 96)
     gold_color = (191, 144, 0)
@@ -58,7 +56,7 @@ def create_shareable_card(name, status, jamb, olevel, intv, total_score):
         logo = Image.open("logo.png").convert("RGBA").resize((120, 120))
         img.paste(logo, (340, 60), logo)
     except:
-        pass
+        d.text((400, 100), "TIMMYTECH", font=font_title, fill=navy_color, anchor="mm")
 
     # 3. Headings (Centered)
     d.text((400, 200), "TIMMYTECH UNIVERSITY OF CODING", font=font_title, fill=navy_color, anchor="mm")
@@ -95,7 +93,6 @@ def create_shareable_card(name, status, jamb, olevel, intv, total_score):
     card_path = "official_admission_report.png"
     img.save(card_path)
     return card_path
-    
     
 # --- 1. THE PERSISTENCE HOOK (Must be at the top) ---
 query_params = st.query_params
