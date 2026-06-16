@@ -594,16 +594,45 @@ elif page == "Export Reports":
                         )
                 st.markdown('</div>', unsafe_allow_html=True)
     
-
-
 elif page == "Help & Support":
     st.title("💬 Help & Support Center")
-    c1, c2 = st.columns([1, 2])
-    with c1:
-        st.markdown('<img src="https://i.imgur.com/7M49Vnz.jpeg" class="help-img">', unsafe_allow_html=True)
-    with c2:
-        st.subheader("Developer Info")
-        st.write("Developed by: **Ajayi Oluwatimileyin Daniel**")
-        st.write("📞 **WhatsApp/Call:** 09168090334")
-        st.write("📱 **Facebook:** [facebook.com/Timmytech](https://facebook.com/Timmytech)")
-        st.write("🎵 **TikTok:** [tiktok.com/@Timmytech](https://tiktok.com/@Timmytech)")
+    
+    # Header Section
+    with st.container():
+        c1, c2 = st.columns([1, 2])
+        with c1:
+            # Replace with your actual hosted image URL
+            st.image("https://i.imgur.com/YOUR_IMAGE_LINK.jpg", use_column_width=True)
+            st.caption("Available for consultation & technical support.")
+        with c2:
+            st.subheader("Get in Touch")
+            st.write("Need assistance or have technical inquiries? Reach out via:")
+            st.info("📞 **WhatsApp/Call:** [09168090334](https://wa.me/2349168090334)")
+            st.write("📱 **Facebook:** [Timmytech](https://facebook.com/Timmytech)")
+            st.write("🎵 **TikTok:** [@Timmytech](https://tiktok.com/@Timmytech)")
+            
+    st.markdown("---")
+    
+    # FAQ Section
+    st.subheader("💡 Quick Help")
+    with st.expander("How do I interpret my forecast results?"):
+        st.write("The forecast provides a probability based on your JAMB score and subject performance. A higher percentage indicates a stronger admission profile.")
+    with st.expander("Can I export my history?"):
+        st.write("Yes, navigate to the 'Export Reports' tab to download your data as a CSV file.")
+    
+    # Feedback Section
+    st.markdown("---")
+    st.subheader("📝 Send Feedback")
+    feedback = st.text_area("Found a bug or have a suggestion? Let me know!")
+    if st.button("Submit Feedback"):
+        if feedback:
+            st.success("Thank you! Your feedback has been sent to the developer.")
+            # Add logic here to save feedback to a file or database
+        else:
+            st.warning("Please enter your feedback before submitting.")
+
+    # Legal & Versioning Footer
+    st.markdown("---")
+    st.caption("🛡️ [Privacy Policy](#) | 📜 [Terms of Service](#)")
+    st.caption("Version 1.0.0 (Stable) | Developed by Ajayi Oluwatimileyin Daniel")
+
