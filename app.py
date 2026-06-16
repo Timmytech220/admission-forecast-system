@@ -105,31 +105,50 @@ query_params = st.query_params
 
 st.markdown("""
     <style>
-    /* Global Styles */
-    .stApp { background-color: #f8f9fa; }
+    /* Global Styles & Font */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
     
-    /* Button Styling (Premium Blue) */
-    div.stButton > button { 
-        background-color: #1e3a8a; 
-        color: white; 
-        border-radius: 8px; 
-        font-weight: bold; 
+    .stApp { 
+        background-color: #f4f7f6; 
+        font-family: 'Inter', sans-serif; 
     }
     
-    /* Premium Report Card Style */
+    /* Sidebar Styling (Deep Navy) */
+    [data-testid="stSidebar"] { 
+        background-color: #002060; 
+    }
+    [data-testid="stSidebar"] * { 
+        color: #ffffff; 
+    }
+    
+    /* Button Styling (Navy to Gold Hover) */
+    div.stButton > button { 
+        background-color: #002060 !important; 
+        color: #ffffff !important; 
+        border-radius: 6px !important; 
+        border: 1px solid #BF9000 !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease;
+    }
+    div.stButton > button:hover { 
+        background-color: #BF9000 !important; 
+        color: #002060 !important; 
+    }
+    
+    /* Institutional Card Style */
     .report-card { 
         background: white; 
-        padding: 15px; 
-        border-radius: 10px; 
-        border: 1px solid #e2e8f0; 
-        margin-bottom: 15px;
-        box-shadow: 2px 2px 10px rgba(0,0,0,0.05);
+        padding: 25px; 
+        border-radius: 12px; 
+        border-left: 6px solid #BF9000; /* Gold Accent */
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
     }
     
-    /* Sidebar Styling */
-    [data-testid="stSidebar"] { 
-        background-color: #0e1117; 
-        color: white; 
+    /* Table Headers */
+    thead tr th {
+        background-color: #002060 !important;
+        color: white !important;
     }
     </style>
 """, unsafe_allow_html=True)
