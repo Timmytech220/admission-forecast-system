@@ -10,6 +10,15 @@ import zipfile
 import io
 
 
+# --- INITIALIZATION ---
+if "activity_log" not in st.session_state:
+    st.session_state.activity_log = []
+
+if "notifications" not in st.session_state:
+    st.session_state.notifications = []
+    
+
+
 
 
 # 1. Fixed Syntax: Corrected function definition line
@@ -96,6 +105,15 @@ def create_shareable_card(name, status, jamb, olevel, intv):
     card_path = "official_admission_report.png"
     img.save(card_path)
     return card_path
+
+
+# --- LOGGING UTILITY ---
+def log_activity(action, role="System"):
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    log_entry = f"[{timestamp}] {role}: {action}"
+    st.session_state.activity_log.insert(0, log_entry) 
+    st.session_state.activity_log = st.session_state.activity_log[:5] # Keep only 5
+    
     
 # --- 1. THE PERSISTENCE HOOK (Must be at the top) ---
 query_params = st.query_params
