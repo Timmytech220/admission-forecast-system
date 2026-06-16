@@ -552,6 +552,53 @@ elif page == "Bulk Forecast":
                 st.error(f"Missing columns! Your file must include: {required}")
         except Exception as e:
             st.error(f"Error processing file: {e}")
+
+
+elif page == "Admin Control Panel":
+    if st.session_state.get("role") == "Admin":
+        st.subheader("🛠 Admin Management Control Panel")
+        
+        # Check if history exists
+        if 'history' in st.session_state and len(st.session_state.history) > 0:
+            # Create DataFrame for searching
+            df_control = pd.DataFrame(st.session_state.history)
+            
+            # 1. Search Section
+            search_query = st.text_input("🔍 Search Student by Name")
+            
+            if search_query:
+                filtered_df = df_control[df_control['name'].str.contains(search_query, case=False, na=False)]
+                if not filtered_df.empty:
+                    st.write("Results Found:", filtered_df)
+                    
+                    # 2. Update Form
+                    st.markdown("### ✏️ Manual Override")
+                    with st.form("override_form"):
+                        new_status = st.selectbox("Update Status", ["QUALIFIED", "NOT QUALIFIED"])
+                        submit = st.form_submit_button("Update Record")
+                        
+                        if submit:
+                            # Update the record in session_state
+                            for entry in st.session_state.history:
+                                if entry['name'].lower() == search_query.lower():
+                                    entry['status'] = new_status
+                            
+                            st.success(f"Record for {search_query} updated to {new_status}!")
+                            log_activity(f"Admin manually updated {search_query} to {new_status}", role="Admin")
+                            st.rerun()
+                else:
+                    st.warning("No student found with that name.")
+        else:
+            st.info("No data available to manage.")
+        
+        # 3. Data Cleanup
+        st.divider()
+        if st.button("⚠️ Clear All History"):
+            st.session_state.history = []
+            st.rerun()
+    else:
+        st.error("Access Denied: Admin only.")
+        
                                 
         
             
