@@ -292,6 +292,7 @@ if "last_result" not in st.session_state: st.session_state.last_result = None
 
 
 
+
 # --- 4. SIDEBAR ---
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2942/2942813.png", width=80) 
@@ -306,12 +307,12 @@ with st.sidebar:
     lang = st.selectbox("🌍 Select Language", list(translations.keys()))
     
     # 2. DYNAMIC NAVIGATION WITH NOTIFICATION BADGE
-    # Check if there is a pending update for the student
     has_update = st.session_state.get("new_update", False)
     history_label = "History Log 🔔" if (has_update and user_role == "Student") else "History Log"
     
     if user_role == "Admin":
-        nav_options = ["Dashboard", "Admission Forecast", "Bulk Forecast", "History Log", "Export Reports", "Help & Support"]
+        # Added "Admin Control Panel" here
+        nav_options = ["Dashboard", "Admission Forecast", "Bulk Forecast", "History Log", "Export Reports", "Admin Control Panel", "Help & Support"]
     else:
         nav_options = ["Admission Forecast", history_label, "Help & Support"]
     
@@ -338,6 +339,7 @@ with st.sidebar:
     st.write(f"Role: **{user_role}**")
     st.write("Developed by: **Ajayi Oluwatimileyin Daniel**")
     
+
 
 
 
