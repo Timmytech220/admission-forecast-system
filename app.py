@@ -11,13 +11,16 @@ import io
 
 
 # --- INITIALIZATION ---
-if "activity_log" not in st.session_state:
-    st.session_state.activity_log = []
 
-if "notifications" not in st.session_state:
-    st.session_state.notifications = []
-    
-
+# --- PERSISTENCE: Check URL for login status ---
+if "logged_in" not in st.session_state:
+    params = st.query_params
+    if params.get("logged_in") == "true":
+        st.session_state.logged_in = True
+        st.session_state.role = params.get("user_role", "Student")
+    else:
+        st.session_state.logged_in = False
+        
 
 
 
