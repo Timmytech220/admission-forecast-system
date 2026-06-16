@@ -6,6 +6,8 @@ import os
 import uuid
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
+import zipfile
+import io
 
 
 
@@ -368,32 +370,69 @@ elif page == "Admission Forecast":
 
                                                   
 
+
+# ... (rest of your existing imports) ...
+
 elif page == "Bulk Forecast":
     st.title("📂 Bulk Applicant Processing")
-    st.write("Upload a CSV file containing columns: `jamb_score`, `olevel_points`, `interview_score`.")
+    st.write("Upload a CSV file containing columns: `name`, `jamb_score`, `olevel_points`, `interview_score`.")
     uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
+    
     if uploaded_file is not None:
         try:
             df = pd.read_csv(uploaded_file)
-            required = ['jamb_score', 'olevel_points', 'interview_score']
+            required = ['name', 'jamb_score', 'olevel_points', 'interview_score']
+            
             if all(col in df.columns for col in required):
                 st.success("File format verified!")
                 st.write("### Preview of uploaded data:")
                 st.dataframe(df.head())
-                if st.button("Process Batch"):
+                
+                if st.button("Process Batch & Generate Cards"):
+                    # 1. Prediction Logic
                     df_to_predict = df.copy()
                     df_to_predict = df_to_predict.rename(columns={'olevel_points': 'waec_points'})
                     predictions = pipeline.predict(df_to_predict[['jamb_score', 'waec_points', 'interview_score']])
-                    df['Probability'] = predictions
-                    df['Status'] = df['Probability'].apply(lambda x: 'QUALIFIED' if x >= 0.5 else 'NOT QUALIFIED')
+                    df['Status'] = ['QUALIFIED' if p >= 0.5 else 'NOT QUALIFIED' for p in predictions]
+                    
+                    # 2. ZIP Creation (In-Memory)
+                    zip_buffer = io.BytesIO()
+                    with zipfile.ZipFile(zip_buffer, "w") as zf:
+                        with st.spinner("Generating student cards..."):
+                            for index, row in df.iterrows():
+                                # Generate the card
+                                card_path = create_shareable_card(
+                                    row['name'], 
+                                    row['Status'], 
+                                    row['jamb_score'], 
+                                    row['olevel_points'], 
+                                    row['interview_score']
+                                )
+                                # Add to zip
+                                zf.write(card_path, arcname=f"{row['name']}_report.png")
+                                # Cleanup individual file to save space
+                                if os.path.exists(card_path):
+                                    os.remove(card_path)
+                    
                     st.success("Processing Complete!")
-                    st.dataframe(df)
+                    
+                    # 3. Download Buttons
+                    # Download CSV
                     csv = df.to_csv(index=False).encode('utf-8')
-                    st.download_button("Download Full Report", csv, "results.csv", "text/csv")
+                    st.download_button("Download CSV Report", csv, "results.csv", "text/csv")
+                    
+                    # Download ZIP
+                    st.download_button(
+                        label="📥 Download All Student Cards (ZIP)",
+                        data=zip_buffer.getvalue(),
+                        file_name="admission_cards.zip",
+                        mime="application/zip"
+                    )
             else:
                 st.error(f"Missing columns! Your file must include: {required}")
         except Exception as e:
-            st.error(f"Error processing file: {e}. Please ensure your CSV is properly formatted.")
+            st.error(f"Error processing file: {e}")
+        
             
 elif page == "History Log":
     st.title("📜 Prediction History")
