@@ -258,9 +258,17 @@ st.markdown("""
 
 
 # --- 2. AUTHENTICATION ---
-if "logged_in" not in st.session_state: 
-    st.session_state.logged_in = False
-    st.session_state.role = "Student" # Default
+
+
+# Check Query Params on page load (before anything else)
+params = st.query_params
+if "logged_in" not in st.session_state:
+    if params.get("logged_in") == "true":
+        st.session_state.logged_in = True
+        st.session_state.role = params.get("user_role", "Student")
+    else:
+        st.session_state.logged_in = False
+        st.session_state.role = "Student"
 
 if not st.session_state.logged_in:
     c1, mid, c3 = st.columns([1, 1.5, 1])
@@ -274,18 +282,25 @@ if not st.session_state.logged_in:
             # Admin Login Logic
             if user == "Admin" and pwd == "1234":
                 st.session_state.logged_in = True
-                st.session_state.role = "Admin" 
+                st.session_state.role = "Admin"
+                # Save to Query Params for persistence
+                st.query_params["logged_in"] = "true"
+                st.query_params["user_role"] = "Admin"
                 st.rerun()
-            # Student Login Logic (Timmy)
+            # Student Login Logic
             elif user == "Timmy" and pwd == "1234":
                 st.session_state.logged_in = True
                 st.session_state.role = "Student"
+                # Save to Query Params for persistence
+                st.query_params["logged_in"] = "true"
+                st.query_params["user_role"] = "Student"
                 st.rerun()
             else: 
                 st.error("Invalid credentials!")
                 
         st.markdown("</div>", unsafe_allow_html=True)
     st.stop()
+            
     
 
 # --- 3. MODEL & STATE ---
