@@ -12,7 +12,8 @@ import io
 
 # --- INITIALIZATION ---
 
-# --- PERSISTENCE: Check URL for login status ---
+
+# 1. Persistence: Check URL for login status
 if "logged_in" not in st.session_state:
     params = st.query_params
     if params.get("logged_in") == "true":
@@ -20,7 +21,17 @@ if "logged_in" not in st.session_state:
         st.session_state.role = params.get("user_role", "Student")
     else:
         st.session_state.logged_in = False
-        
+
+# 2. Activity & Notification Setup (Fixes the AttributeError)
+if "activity_log" not in st.session_state:
+    st.session_state.activity_log = []
+
+if "notifications" not in st.session_state:
+    st.session_state.notifications = []
+
+# 3. Ensure history is loaded every time (Persistence fix)
+st.session_state.history = load_user_from_sheet()
+
 
 
 
