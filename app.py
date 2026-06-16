@@ -10,6 +10,20 @@ import zipfile
 import io
 
 
+
+# 1. Fixed Syntax: Corrected function definition line
+
+def load_user_from_sheet(user_id=None):
+    try:
+        conn = st.connection("gsheets", type="gsheets")
+        df = conn.read(worksheet="Sheet1")
+        if user_id:
+            df = df[df['id'] == user_id]
+        return df.to_dict('records')
+    except Exception as e:
+        return []
+        
+
 # --- INITIALIZATION ---
 
 
@@ -35,22 +49,9 @@ st.session_state.history = load_user_from_sheet()
 
 
 
-# 1. Fixed Syntax: Corrected function definition line
-
-def load_user_from_sheet(user_id=None):
-    try:
-        conn = st.connection("gsheets", type="gsheets")
-        df = conn.read(worksheet="Sheet1")
-        if user_id:
-            df = df[df['id'] == user_id]
-        return df.to_dict('records')
-    except Exception as e:
-        return []
-
 # 2. Call it properly
 
-# ADD THIS LINE:
-st.session_state.history = load_user_from_sheet()
+
 
 # 3. Fixed Function: Removed total_score argument to prevent "missing argument" errors
 def create_shareable_card(name, status, jamb, olevel, intv):
