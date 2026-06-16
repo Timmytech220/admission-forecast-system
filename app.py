@@ -593,35 +593,42 @@ elif page == "Export Reports":
                             key=f"dl_card_btn_{i}"
                         )
                 st.markdown('</div>', unsafe_allow_html=True)
-    
+
+
+
 elif page == "Help & Support":
     st.title("💬 Help & Support Center")
     
-    # Header Section
-    with st.container():
+    # 1. Developer Profile Section
+    with st.container(border=True):
         c1, c2 = st.columns([1, 2])
         with c1:
-            # Replace with your actual hosted image URL
-            st.image("https://i.imgur.com/YOUR_IMAGE_LINK.jpg", use_column_width=True)
+            # Using your verified developer photo
+            st.image("https://i.imgur.com/KyKv9T9.png", use_container_width=True)
             st.caption("Available for consultation & technical support.")
         with c2:
-            st.subheader("Get in Touch")
-            st.write("Need assistance or have technical inquiries? Reach out via:")
+            st.subheader("Developer Info")
+            st.write("Developed by: **Ajayi Oluwatimileyin Daniel**")
             st.info("📞 **WhatsApp/Call:** [09168090334](https://wa.me/2349168090334)")
             st.write("📱 **Facebook:** [Timmytech](https://facebook.com/Timmytech)")
             st.write("🎵 **TikTok:** [@Timmytech](https://tiktok.com/@Timmytech)")
-            
-    st.markdown("---")
+
+    st.divider()
+
+    # 2. Professional Knowledge Base
+    st.subheader("📚 Knowledge Base")
+    with st.expander("❓ How is my admission forecast calculated?"):
+        st.write("Our system uses a verified Machine Learning model that analyzes your JAMB score, O-Level grades, and interview performance against institutional benchmarks.")
+    with st.expander("🛠 What if my subject combination is missing?"):
+        st.write("Please contact the Admin directly via the WhatsApp link above to have your specific subject combination added to the database.")
+    with st.expander("📈 How do I get my official report?"):
+        st.write("Once your status is marked as 'QUALIFIED', a 'Download Official Letter' button will automatically appear in your sidebar.")
+    with st.expander("🔐 Admin Support/Maintenance"):
+        st.write("If you are an Admin needing technical assistance or system maintenance, please reach out via the provided channels to report system logs.")
+
+    st.divider()
     
-    # FAQ Section
-    st.subheader("💡 Quick Help")
-    with st.expander("How do I interpret my forecast results?"):
-        st.write("The forecast provides a probability based on your JAMB score and subject performance. A higher percentage indicates a stronger admission profile.")
-    with st.expander("Can I export my history?"):
-        st.write("Yes, navigate to the 'Export Reports' tab to download your data as a CSV file.")
-    
-    # Feedback Section
-    st.markdown("---")
+    # 3. Feedback Section
     st.subheader("📝 Send Feedback")
     feedback = st.text_area("Found a bug or have a suggestion? Let me know!")
     if st.button("Submit Feedback"):
@@ -631,8 +638,8 @@ elif page == "Help & Support":
         else:
             st.warning("Please enter your feedback before submitting.")
 
-    # Legal & Versioning Footer
+    # 4. Legal Footer
     st.markdown("---")
-    st.caption("🛡️ [Privacy Policy](#) | 📜 [Terms of Service](#)")
+    st.caption("🛡️ Privacy Policy | 📜 Terms of Service")
     st.caption("Version 1.0.0 (Stable) | Developed by Ajayi Oluwatimileyin Daniel")
 
