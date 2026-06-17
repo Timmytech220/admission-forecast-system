@@ -471,47 +471,48 @@ elif page == "Admission Forecast":
         intv = st.slider("Interview Score", 0, 100, 50)
         
         # 1. THE FORECAST BUTTON
-        if st.button(translations[lang]["btn"], type="primary"):
-            if not name.strip():
-                st.error("⚠️ Oops! Don't forget to enter your name, superstar!")
-            elif "None" in [eng, mat, sub3_grade, sub4_grade, sub5_grade]:
-                st.error("⚠️ Hold on! Make sure you select grades for all 5 subjects.")
-            else:
-                try:
-                    with st.spinner('Analyzing your profile, hang tight... 🚀'):
-                        # Process Data
-                        input_data = pd.DataFrame({
-                            "jamb_score": [float(jamb)], 
-                            "waec_points": [float(olevel)], 
-                            "interview_score": [float(intv)]
-                        })
-                        prob = float(pipeline.predict(input_data)[0])
-                        status = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
-                        
-                        # Save to Google Sheets
-                        save_data(name, f"{status} ({prob:.1%})", f"{prob:.1%}", str(jamb), str(olevel), str(intv))
-                        
-                        # --- PERSISTENCE FIX ---
-                        st.cache_data.clear() 
-                        st.session_state.history = load_user_from_sheet() 
-                        
-                        # Update session state for the UI
-                        st.session_state.last_result = {
-                            "name": name, 
-                            "status": f"{status} ({prob:.1%})", 
-                            "prob": prob, 
-                            "jamb": jamb, 
-                            "olevel": olevel, 
-                            "intv": intv
-                        }
-                    
-                    # Refresh the app to show updated data everywhere
-                    st.rerun() 
-                    
-                except Exception as e:
-                    st.error(f"⚠️ A glitch occurred: {e}")
-                    st.session_state.last_result = None
-
+if st.button(translations[lang]["btn"], type="primary"):
+    if not name.strip():
+        st.error("⚠️ Oops! Don't forget to enter your name, superstar!")
+    elif "None" in [eng, mat, sub3_grade, sub4_grade, sub5_grade]:
+        st.error("⚠️ Hold on! Make sure you select grades for all 5 subjects.")
+    else:
+        try:
+            with st.spinner('Analyzing your profile, hang tight... 🚀'):
+                # Process Data
+                input_data = pd.DataFrame({
+                    "jamb_score": [float(jamb)], 
+                    "waec_points": [float(olevel)], 
+                    "interview_score": [float(intv)]
+                })
+                prob = float(pipeline.predict(input_data)[0])
+                status = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
+                
+                # Save to Google Sheets
+                save_data(name, f"{status} ({prob:.1%})", f"{prob:.1%}", str(jamb), str(olevel), str(intv))
+                
+                # --- PERSISTENCE FIX ---
+                # Force cache to clear and reload the updated data from Google Sheets
+                st.cache_data.clear() 
+                st.session_state.history = load_user_from_sheet()
+                
+                # Update session state for the UI result display
+                st.session_state.last_result = {
+                    "name": name, 
+                    "status": f"{status} ({prob:.1%})", 
+                    "prob": prob, 
+                    "jamb": jamb, 
+                    "olevel": olevel, 
+                    "intv": intv
+                }
+            
+            # Refresh the app to show updated data throughout the application
+            st.rerun() 
+            
+        except Exception as e:
+            st.error(f"⚠️ A glitch occurred: {e}")
+            st.session_state.last_result = None
+            
     # 2. THE RESULT DISPLAY
     if "last_result" in st.session_state and st.session_state.last_result:
         res = st.session_state.last_result
