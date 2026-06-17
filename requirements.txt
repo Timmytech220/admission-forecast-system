@@ -4,5 +4,3 @@ joblib
 scikit-learn
 plotly
 st-gsheets-connection
-gspread
-oauth2client
