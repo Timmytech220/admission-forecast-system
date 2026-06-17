@@ -13,14 +13,18 @@ import io
 
 # 1. Fixed Syntax: Corrected function definition line
 
-def load_user_from_sheet(user_id=None):
+# --- IMPROVED DATA LOADER ---
+@st.cache_data(ttl=60) # Caches data for 60 seconds to prevent constant API calls
+def load_user_from_sheet():
     try:
         conn = st.connection("gsheets", type="gsheets")
         df = conn.read(worksheet="Sheet1")
-        if user_id:
-            df = df[df['id'] == user_id]
-        return df.to_dict('records')
+        # Ensure it returns an empty list if data is empty, or records if data exists
+        if df is not None and not df.empty:
+            return df.to_dict('records')
+        return []
     except Exception as e:
+        st.error(f"Error loading sheet: {e}")
         return []
         
 
@@ -658,41 +662,31 @@ elif page == "Admin Control Panel":
         
                                 
         
+
 elif page == "History Log":
     st.title("📜 Prediction History")
     
-    # 1. Attempt to fetch/refresh data if missing
-    if not st.session_state.get("history"):
-        st.session_state.history = load_user_from_sheet()
-
-    # 2. Safely check if data exists and is a list of dictionaries
-    if isinstance(st.session_state.history, list) and len(st.session_state.history) > 0:
-        try:
-            df = pd.DataFrame(st.session_state.history)
-            st.dataframe(df, use_container_width=True)
-        except Exception as e:
-            st.error("⚠️ Data format error. Please check your Google Sheet columns.")
+    # Refresh data from source
+    history_data = load_user_from_sheet()
+    
+    if history_data:
+        df = pd.DataFrame(history_data)
+        st.dataframe(df, use_container_width=True)
     else:
         st.info("No records found in your database.")
-
-
-
 
 elif page == "Export Reports":
     st.title("🖨️ Export Official Reports")
     
-    # 1. Attempt to fetch/refresh data if missing
-    if not st.session_state.get("history"):
-        st.session_state.history = load_user_from_sheet()
+    # Refresh data from source
+    history_data = load_user_from_sheet()
     
-    if not isinstance(st.session_state.history, list) or len(st.session_state.history) == 0:
+    if not history_data:
         st.info("No records found in history to export.")
     else:
         st.write("Click below to download professional student result cards:")
         
-        # 2. Use a loop that guarantees unique keys
-        for i, s in enumerate(st.session_state.history):
-            # Safe extraction with defaults
+        for i, s in enumerate(history_data):
             name = str(s.get('name', 'Unknown'))
             status = str(s.get('status', 'N/A'))
             jamb = str(s.get('jamb', '0'))
@@ -702,27 +696,21 @@ elif page == "Export Reports":
             with st.container(border=True):
                 st.write(f"**Student:** {name} | **Status:** {status}")
                 
+                # Re-generate card on demand
                 card_path = create_shareable_card(name, status, jamb, olevel, intv)
                 
-                # Check file existence and generate safe download
                 if card_path and os.path.exists(card_path):
-                    try:
-                        with open(card_path, "rb") as file:
-                            # Use index 'i' combined with hash to ensure button uniqueness
-                            st.download_button(
-                                label=f"📸 Download {name}'s Card",
-                                data=file,
-                                file_name=f"{name.replace(' ', '_')}_result.png",
-                                mime="image/png",
-                                key=f"dl_btn_{i}_{name}" 
-                            )
-                    except Exception as e:
-                        st.error(f"Error reading file: {e}")
+                    with open(card_path, "rb") as file:
+                        st.download_button(
+                            label=f"📸 Download {name}'s Card",
+                            data=file,
+                            file_name=f"{name.replace(' ', '_')}_result.png",
+                            mime="image/png",
+                            key=f"dl_btn_{i}_{name}" 
+                        )
                 else:
-                    st.warning("Result card is being generated... please wait.")
+                    st.warning("Result card generation failed.")
                     
-    
-
 
 
 elif page == "Help & Support":
