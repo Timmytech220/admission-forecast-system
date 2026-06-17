@@ -47,7 +47,7 @@ if "notifications" not in st.session_state:
     st.session_state.notifications = []
 
 
-# 3. Ensure history is loaded ONLY if it's empty
+# 3. Ensure history is loaded ONLY if it's missing (Persistent Fix)
 if "history" not in st.session_state or st.session_state.history is None:
     st.session_state.history = load_user_from_sheet()
     
