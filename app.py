@@ -468,26 +468,34 @@ elif page == "Admission Forecast":
         
         # 1. THE FORECAST BUTTON
 if st.button(translations[lang]["btn"], type="primary"):
-    if not name.strip(): 
+    # Input validation
+    if not name.strip():
         st.error("⚠️ Oops! Don't forget to enter your name, superstar!")
     elif "None" in [eng, mat, sub3_grade, sub4_grade, sub5_grade]:
         st.error("⚠️ Hold on! Make sure you select grades for all 5 subjects.")
     else:
-        with st.spinner('Analyzing your profile, hang tight... 🚀'):
-            try:
-                input_data = pd.DataFrame({"jamb_score": [jamb], "waec_points": [olevel], "interview_score": [intv]})
-                prob = float(pipeline.predict(input_data)[0])
+        # Using a container to hold the spinner and execution
+        try:
+            with st.spinner('Analyzing your profile, hang tight... 🚀'):
+                # Ensure input_data is correctly formatted as a DataFrame
+                input_data = pd.DataFrame({
+                    "jamb_score": [float(jamb)], 
+                    "waec_points": [float(olevel)], 
+                    "interview_score": [float(intv)]
+                })
+                
+                # Predict
+                prediction = pipeline.predict(input_data)
+                prob = float(prediction[0])
+                
                 status_text = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
                 status = f"{status_text} ({prob:.1%})"
                 
                 # Save to Google Sheets
                 save_data(name, status, f"{prob:.1%}", str(jamb), str(olevel), str(intv))
                 
-                # PERSISTENCE FIX: 
-                # Immediately reload history from Google Sheets to ensure it persists on refresh
+                # Update session state for persistence
                 st.session_state.history = load_user_from_sheet() 
-                
-                # Update last result
                 st.session_state.last_result = {
                     "name": name, 
                     "status": status, 
@@ -496,11 +504,15 @@ if st.button(translations[lang]["btn"], type="primary"):
                     "olevel": olevel, 
                     "intv": intv
                 }
-                
-                st.rerun() 
-            except Exception as e:
-                st.error(f"⚠️ A glitch occurred: {e}")
-                st.session_state.last_result = None
+            
+            # Rerun outside the spinner/try block to refresh the UI
+            st.rerun() 
+            
+        except Exception as e:
+            st.error(f"⚠️ A glitch occurred: {e}")
+            st.session_state.last_result = None
+            
+
                 
 
     # 2. THE RESULT DISPLAY (Must be INSIDE the elif page block to access col1 and col2)
