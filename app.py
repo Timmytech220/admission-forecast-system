@@ -13,35 +13,37 @@ import io
 
 # 1. Fixed Syntax: Corrected function definition line
 
-from streamlit_gsheets import GSheetsConnection  # Required import
+import streamlit as st
+from streamlit_gsheets import GSheetsConnection
 
-@st.cache_data(ttl=60) # Caches data for 60 seconds to prevent constant API calls
+# 1. Initialize the connection globally
+def get_conn():
+    return st.connection("gsheets", type=GSheetsConnection)
+
+# 2. Function to load data
 def load_user_from_sheet():
+    conn = get_conn()
     try:
-        # Using the GSheetsConnection class instead of the string "gsheets"
-        conn = st.connection("gsheets", type=GSheetsConnection)
-        df = conn.read(worksheet="Sheet1")
-        
-        # Ensure it returns an empty list if data is empty, or records if data exists
+        # 'Sheet1' must match your exact tab name
+        df = conn.read(worksheet="Sheet1") 
         if df is not None and not df.empty:
             return df.to_dict('records')
-        return []
     except Exception as e:
         st.error(f"Error loading sheet: {e}")
-        return []
+    return []
 
+# 3. Function to save data (No more gspread!)
 def save_data(name, status, prob, jamb, olevel, intv):
-    # Retrieve the connection you already established at the top of your app
-    # (Assuming you named your connection 'conn' or similar)
-    conn = st.connection("gsheets", type=GSheetsConnection)
-    
-    # Prepare your data as a DataFrame or a list
+    conn = get_conn()
     new_data = [name, status, prob, jamb, olevel, intv]
-    
-    # Use the connection to append to your sheet
-    # This assumes your connection is configured to point to the correct sheet
-    conn.append(data=new_data)
-    
+    try:
+        # This appends a new row to the sheet
+        conn.append(data=new_data)
+        st.success("Data saved successfully!")
+    except Exception as e:
+        st.error(f"Failed to save data: {e}")
+
+# ... Rest of your app logic ...
 
 # --- INITIALIZATION ---
 
