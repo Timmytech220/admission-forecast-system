@@ -438,6 +438,7 @@ if page == "Dashboard":
         
 
 
+
 elif page == "Admission Forecast":
     st.title(translations[lang]["title"])
     col1, col2 = st.columns([1, 1])
@@ -466,59 +467,39 @@ elif page == "Admission Forecast":
         olevel = calculate_olevel_points([eng, mat, sub3_grade, sub4_grade, sub5_grade])
         intv = st.slider("Interview Score", 0, 100, 50)
         
-        # 1. THE FORECAST BUTTON
-if st.button(translations[lang]["btn"], type="primary"):
-    # Input validation
-    if not name.strip():
-        st.error("⚠️ Oops! Don't forget to enter your name, superstar!")
-    elif "None" in [eng, mat, sub3_grade, sub4_grade, sub5_grade]:
-        st.error("⚠️ Hold on! Make sure you select grades for all 5 subjects.")
-    else:
-        # Using a container to hold the spinner and execution
-        try:
-            with st.spinner('Analyzing your profile, hang tight... 🚀'):
-                # Ensure input_data is correctly formatted as a DataFrame
-                input_data = pd.DataFrame({
-                    "jamb_score": [float(jamb)], 
-                    "waec_points": [float(olevel)], 
-                    "interview_score": [float(intv)]
-                })
-                
-                # Predict
-                prediction = pipeline.predict(input_data)
-                prob = float(prediction[0])
-                
-                status_text = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
-                status = f"{status_text} ({prob:.1%})"
-                
-                # Save to Google Sheets
-                save_data(name, status, f"{prob:.1%}", str(jamb), str(olevel), str(intv))
-                
-                # Update session state for persistence
-                st.session_state.history = load_user_from_sheet() 
-                st.session_state.last_result = {
-                    "name": name, 
-                    "status": status, 
-                    "prob": prob, 
-                    "jamb": jamb, 
-                    "olevel": olevel, 
-                    "intv": intv
-                }
-            
-            # Rerun outside the spinner/try block to refresh the UI
-            st.rerun() 
-            
-        except Exception as e:
-            st.error(f"⚠️ A glitch occurred: {e}")
-            st.session_state.last_result = None
-            
+        # 1. THE FORECAST BUTTON (Properly indented inside the block)
+        if st.button(translations[lang]["btn"], type="primary"):
+            if not name.strip():
+                st.error("⚠️ Oops! Don't forget to enter your name, superstar!")
+            elif "None" in [eng, mat, sub3_grade, sub4_grade, sub5_grade]:
+                st.error("⚠️ Hold on! Make sure you select grades for all 5 subjects.")
+            else:
+                try:
+                    with st.spinner('Analyzing your profile, hang tight... 🚀'):
+                        # Process Data
+                        input_data = pd.DataFrame({
+                            "jamb_score": [float(jamb)], 
+                            "waec_points": [float(olevel)], 
+                            "interview_score": [float(intv)]
+                        })
+                        prob = float(pipeline.predict(input_data)[0])
+                        status = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
+                        
+                        # Save
+                        save_data(name, f"{status} ({prob:.1%})", f"{prob:.1%}", str(jamb), str(olevel), str(intv))
+                        st.session_state.history = load_user_from_sheet() 
+                        st.session_state.last_result = {
+                            "name": name, "status": f"{status} ({prob:.1%})", 
+                            "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv
+                        }
+                    st.rerun() 
+                except Exception as e:
+                    st.error(f"⚠️ A glitch occurred: {e}")
+                    st.session_state.last_result = None
 
-                
-
-    # 2. THE RESULT DISPLAY (Must be INSIDE the elif page block to access col1 and col2)
+    # 2. THE RESULT DISPLAY (Now scoped correctly within the elif block)
     if "last_result" in st.session_state and st.session_state.last_result:
         res = st.session_state.last_result
-        
         with col1:
             if res['prob'] >= 0.5:
                 st.success(f"Success! {res['status']}")
@@ -526,26 +507,21 @@ if st.button(translations[lang]["btn"], type="primary"):
                 st.toast('Keep pushing!', icon='💪')
                 st.warning(f"Result: {res['status']}")
             
-            if 'create_shareable_card' in globals():
-                try:
-                    card_path = create_shareable_card(res['name'], res['status'], res['jamb'], res['olevel'], res['intv'])
-                    if card_path and os.path.exists(card_path):
-                        with open(card_path, "rb") as file:
-                            st.download_button("📸 Download Result Card!", file, "official_result_card.png", "image/png")
-                except Exception as e:
-                    st.error(f"Could not generate card: {e}")
+            # Use try-except to handle potential path errors
+            try:
+                card_path = create_shareable_card(res['name'], res['status'], res['jamb'], res['olevel'], res['intv'])
+                if card_path and os.path.exists(card_path):
+                    with open(card_path, "rb") as file:
+                        st.download_button("📸 Download Result Card!", file, "official_result_card.png", "image/png")
+            except Exception as e:
+                st.error(f"Card error: {e}")
         
         with col2:
             st.subheader(translations[lang]["roadmap"])
-            tips = get_roadmap(res['jamb'], res['olevel'])
-            for tip in tips: st.info(tip)
-            st.info(f"🚀 **Insight Summary:** Focus on {'Interview skills' if res['intv'] < 60 else 'academic subjects'}.")
+            for tip in get_roadmap(res['jamb'], res['olevel']): st.info(tip)
             df_plot = pd.DataFrame({"Metric": ["JAMB", "O-Level", "INT"], "Score": [res['jamb']/4, res['olevel'], res['intv']]})
-            fig = px.bar(df_plot, x="Metric", y="Score", color="Score", color_continuous_scale="Blues")
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(px.bar(df_plot, x="Metric", y="Score", color="Score"), use_container_width=True)
 
-
-                                                  
 
 
 # ... (rest of your existing imports) ...
