@@ -650,45 +650,61 @@ elif page == "Admin Control Panel":
         
                                 
         
-            
 elif page == "History Log":
     st.title("📜 Prediction History")
 
+    # Ensure data is present
+    if not st.session_state.get("history"):
+        st.session_state.history = load_user_from_sheet()
+
     if st.session_state.history:
+        # Create DataFrame and display
         df = pd.DataFrame(st.session_state.history)
-        st.dataframe(df)
+        st.dataframe(df, use_container_width=True) # Added full width for better UI
     else:
         st.info("No records found in your database.")
         
 
-
 elif page == "Export Reports":
     st.title("🖨️ Export Official Reports")
+    
+    # Ensure data is present
+    if not st.session_state.get("history"):
+        st.session_state.history = load_user_from_sheet()
     
     if not st.session_state.history:
         st.info("No records found in history to export.")
     else:
         st.write("Click below to download professional student result cards:")
         
+        # Loop through history with error handling for missing keys
         for i, s in enumerate(st.session_state.history):
-            with st.container():
-                st.markdown(f'<div class="report-card">', unsafe_allow_html=True)
-                st.write(f"**Student:** {s['name']} | **Status:** {s['status']}")
+            # Safe access to dictionary keys
+            name = s.get('name', 'Unknown')
+            status = s.get('status', 'N/A')
+            jamb = s.get('jamb', '0')
+            olevel = s.get('olevel', '0')
+            intv = s.get('intv', '0')
+            
+            with st.container(border=True):
+                st.write(f"**Student:** {name} | **Status:** {status}")
                 
-                # Generate the professional card for each history item
-                # This uses your 5-argument function!
-                card_path = create_shareable_card(s['name'], s['status'], s['jamb'], s['olevel'], s['intv'])
+                # Generate card
+                card_path = create_shareable_card(name, status, jamb, olevel, intv)
                 
-                if os.path.exists(card_path):
+                # Only show button if file exists
+                if card_path and os.path.exists(card_path):
                     with open(card_path, "rb") as file:
                         st.download_button(
-                            label=f"📸 Download {s['name']}'s Result Card",
+                            label=f"📸 Download {name}'s Card",
                             data=file,
-                            file_name=f"{s['name']}_result.png",
+                            file_name=f"{name}_result.png",
                             mime="image/png",
-                            key=f"dl_card_btn_{i}"
+                            key=f"dl_{i}_{name}" 
                         )
-                st.markdown('</div>', unsafe_allow_html=True)
+                else:
+                    st.error("Card generation failed.")
+    
 
 
 
