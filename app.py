@@ -26,15 +26,18 @@ def load_user_from_sheet(user_id=None):
 
 # --- INITIALIZATION ---
 
-
-# 1. Persistence: Check URL for login status
+# 1. Persistent Login: Only check URL if we aren't already logged in
 if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+    st.session_state.role = "Student"
+
+# Only attempt to extract from query params if not yet logged in
+if not st.session_state.logged_in:
     params = st.query_params
     if params.get("logged_in") == "true":
         st.session_state.logged_in = True
         st.session_state.role = params.get("user_role", "Student")
-    else:
-        st.session_state.logged_in = False
+        
 
 # 2. Activity & Notification Setup (Fixes the AttributeError)
 if "activity_log" not in st.session_state:
