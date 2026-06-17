@@ -471,15 +471,17 @@ elif page == "Admission Forecast":
         intv = st.slider("Interview Score", 0, 100, 50)
         
         # 1. THE FORECAST BUTTON
+
 if st.button(translations[lang]["btn"], type="primary"):
-    if not name.strip():
+    # Basic Validation
+    if not name or not name.strip():
         st.error("⚠️ Oops! Don't forget to enter your name, superstar!")
     elif "None" in [eng, mat, sub3_grade, sub4_grade, sub5_grade]:
         st.error("⚠️ Hold on! Make sure you select grades for all 5 subjects.")
     else:
         try:
             with st.spinner('Analyzing your profile, hang tight... 🚀'):
-                # Process Data
+                # 1. Process Data
                 input_data = pd.DataFrame({
                     "jamb_score": [float(jamb)], 
                     "waec_points": [float(olevel)], 
@@ -488,15 +490,19 @@ if st.button(translations[lang]["btn"], type="primary"):
                 prob = float(pipeline.predict(input_data)[0])
                 status = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
                 
-                # Save to Google Sheets
-                save_data(name, f"{status} ({prob:.1%})", f"{prob:.1%}", str(jamb), str(olevel), str(intv))
+                # 2. Save Data & Validate
+                save_success = save_data(name, f"{status} ({prob:.1%})", f"{prob:.1%}", str(jamb), str(olevel), str(intv))
                 
-                # --- PERSISTENCE FIX ---
-                # Force cache to clear and reload the updated data from Google Sheets
+                # 3. Persistence Sync
+                # We clear cache and reload fresh data to ensure History/Export pages see the new entry
                 st.cache_data.clear() 
-                st.session_state.history = load_user_from_sheet()
+                fresh_data = load_user_from_sheet()
                 
-                # Update session state for the UI result display
+                # Only update session state if we successfully retrieved data
+                if fresh_data is not None:
+                    st.session_state.history = fresh_data
+                
+                # Update UI state
                 st.session_state.last_result = {
                     "name": name, 
                     "status": f"{status} ({prob:.1%})", 
@@ -506,11 +512,13 @@ if st.button(translations[lang]["btn"], type="primary"):
                     "intv": intv
                 }
             
-            # Refresh the app to show updated data throughout the application
+            # Final success signal
+            st.success("Analysis complete!")
             st.rerun() 
             
         except Exception as e:
-            st.error(f"⚠️ A glitch occurred: {e}")
+            st.error(f"⚠️ A system glitch occurred: {e}")
+            # Optional: log this error for your admin panel
             st.session_state.last_result = None
             
     # 2. THE RESULT DISPLAY
@@ -653,58 +661,67 @@ elif page == "Admin Control Panel":
         
 elif page == "History Log":
     st.title("📜 Prediction History")
-
-    # Ensure data is present
+    
+    # 1. Attempt to fetch/refresh data if missing
     if not st.session_state.get("history"):
         st.session_state.history = load_user_from_sheet()
 
-    if st.session_state.history:
-        # Create DataFrame and display
-        df = pd.DataFrame(st.session_state.history)
-        st.dataframe(df, use_container_width=True) # Added full width for better UI
+    # 2. Safely check if data exists and is a list of dictionaries
+    if isinstance(st.session_state.history, list) and len(st.session_state.history) > 0:
+        try:
+            df = pd.DataFrame(st.session_state.history)
+            st.dataframe(df, use_container_width=True)
+        except Exception as e:
+            st.error("⚠️ Data format error. Please check your Google Sheet columns.")
     else:
         st.info("No records found in your database.")
-        
+
+
+
 
 elif page == "Export Reports":
     st.title("🖨️ Export Official Reports")
     
-    # Ensure data is present
+    # 1. Attempt to fetch/refresh data if missing
     if not st.session_state.get("history"):
         st.session_state.history = load_user_from_sheet()
     
-    if not st.session_state.history:
+    if not isinstance(st.session_state.history, list) or len(st.session_state.history) == 0:
         st.info("No records found in history to export.")
     else:
         st.write("Click below to download professional student result cards:")
         
-        # Loop through history with error handling for missing keys
+        # 2. Use a loop that guarantees unique keys
         for i, s in enumerate(st.session_state.history):
-            # Safe access to dictionary keys
-            name = s.get('name', 'Unknown')
-            status = s.get('status', 'N/A')
-            jamb = s.get('jamb', '0')
-            olevel = s.get('olevel', '0')
-            intv = s.get('intv', '0')
+            # Safe extraction with defaults
+            name = str(s.get('name', 'Unknown'))
+            status = str(s.get('status', 'N/A'))
+            jamb = str(s.get('jamb', '0'))
+            olevel = str(s.get('olevel', '0'))
+            intv = str(s.get('intv', '0'))
             
             with st.container(border=True):
                 st.write(f"**Student:** {name} | **Status:** {status}")
                 
-                # Generate card
                 card_path = create_shareable_card(name, status, jamb, olevel, intv)
                 
-                # Only show button if file exists
+                # Check file existence and generate safe download
                 if card_path and os.path.exists(card_path):
-                    with open(card_path, "rb") as file:
-                        st.download_button(
-                            label=f"📸 Download {name}'s Card",
-                            data=file,
-                            file_name=f"{name}_result.png",
-                            mime="image/png",
-                            key=f"dl_{i}_{name}" 
-                        )
+                    try:
+                        with open(card_path, "rb") as file:
+                            # Use index 'i' combined with hash to ensure button uniqueness
+                            st.download_button(
+                                label=f"📸 Download {name}'s Card",
+                                data=file,
+                                file_name=f"{name.replace(' ', '_')}_result.png",
+                                mime="image/png",
+                                key=f"dl_btn_{i}_{name}" 
+                            )
+                    except Exception as e:
+                        st.error(f"Error reading file: {e}")
                 else:
-                    st.error("Card generation failed.")
+                    st.warning("Result card is being generated... please wait.")
+                    
     
 
 
