@@ -1,9 +1,8 @@
-gspread
-oauth2client
 streamlit
 pandas
 joblib
 scikit-learn
 plotly
-
-
+st-gsheets-connection
+gspread
+oauth2client
