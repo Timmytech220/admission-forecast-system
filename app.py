@@ -46,10 +46,10 @@ if "activity_log" not in st.session_state:
 if "notifications" not in st.session_state:
     st.session_state.notifications = []
 
-# 3. Ensure history is loaded every time (Persistence fix)
-st.session_state.history = load_user_from_sheet()
 
-
+# 3. Only load history if it hasn't been loaded yet to prevent overwriting
+if "history" not in st.session_state or st.session_state.history is None:
+    st.session_state.history = load_user_from_sheet()
 
 
 # 2. Call it properly
