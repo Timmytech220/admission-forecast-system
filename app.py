@@ -30,6 +30,18 @@ def load_user_from_sheet():
         st.error(f"Error loading sheet: {e}")
         return []
 
+def save_data(name, status, prob, jamb, olevel, intv):
+    # Retrieve the connection you already established at the top of your app
+    # (Assuming you named your connection 'conn' or similar)
+    conn = st.connection("gsheets", type=GSheetsConnection)
+    
+    # Prepare your data as a DataFrame or a list
+    new_data = [name, status, prob, jamb, olevel, intv]
+    
+    # Use the connection to append to your sheet
+    # This assumes your connection is configured to point to the correct sheet
+    conn.append(data=new_data)
+    
 
 # --- INITIALIZATION ---
 
@@ -237,24 +249,6 @@ def get_roadmap(jamb, olevel_points):
     return tips
     
 
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-import streamlit as st
-
-def save_data(name, status, prob, jamb, olevel, intv):
-    scope = ["https://www.googleapis.com/auth/spreadsheets"]
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(dict(st.secrets["gcp_service_account"]), scope)
-    client = gspread.authorize(creds)
-    
-    # Use the unique ID from your sheet's URL
-    spreadsheet = client.open_by_key("1mmG9VbogSnTLmLwWpOmVa3L1CWCCf5EcZmvJCAGCUp4")
-    
-    # This grabs the first tab in your sheet
-    sheet = spreadsheet.get_worksheet(0) 
-    
-    # This appends the data
-    sheet.append_row([name, status, prob, jamb, olevel, intv])
-    
 
 # --- 1. CONFIG & STYLING ---
 st.set_page_config(page_title="Timmytech Admission Forecast", layout="wide")
