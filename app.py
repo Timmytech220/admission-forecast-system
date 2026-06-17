@@ -13,12 +13,15 @@ import io
 
 # 1. Fixed Syntax: Corrected function definition line
 
-# --- IMPROVED DATA LOADER ---
+from streamlit_gsheets import GSheetsConnection  # Required import
+
 @st.cache_data(ttl=60) # Caches data for 60 seconds to prevent constant API calls
 def load_user_from_sheet():
     try:
-        conn = st.connection("gsheets", type="gsheets")
+        # Using the GSheetsConnection class instead of the string "gsheets"
+        conn = st.connection("gsheets", type=GSheetsConnection)
         df = conn.read(worksheet="Sheet1")
+        
         # Ensure it returns an empty list if data is empty, or records if data exists
         if df is not None and not df.empty:
             return df.to_dict('records')
@@ -26,7 +29,7 @@ def load_user_from_sheet():
     except Exception as e:
         st.error(f"Error loading sheet: {e}")
         return []
-        
+
 
 # --- INITIALIZATION ---
 
