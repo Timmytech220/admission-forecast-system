@@ -485,17 +485,32 @@ elif page == "Admission Forecast":
                         prob = float(pipeline.predict(input_data)[0])
                         status = "QUALIFIED" if prob >= 0.5 else "NOT QUALIFIED"
                         
-                        # Save
+                        # Save to Google Sheets
                         save_data(name, f"{status} ({prob:.1%})", f"{prob:.1%}", str(jamb), str(olevel), str(intv))
+                        
+                        # --- PERSISTENCE FIX ---
+                        # Force a cache clear so the Dashboard, History, and Exports see the new data
+                        st.cache_data.clear() 
                         st.session_state.history = load_user_from_sheet() 
+                        
+                        # Update session state for the UI
                         st.session_state.last_result = {
-                            "name": name, "status": f"{status} ({prob:.1%})", 
-                            "prob": prob, "jamb": jamb, "olevel": olevel, "intv": intv
+                            "name": name, 
+                            "status": f"{status} ({prob:.1%})", 
+                            "prob": prob, 
+                            "jamb": jamb, 
+                            "olevel": olevel, 
+                            "intv": intv
                         }
+                    
+                    # Refresh the app to show updated data everywhere
                     st.rerun() 
+                    
                 except Exception as e:
                     st.error(f"⚠️ A glitch occurred: {e}")
                     st.session_state.last_result = None
+                    
+        
 
     # 2. THE RESULT DISPLAY (Now scoped correctly within the elif block)
     if "last_result" in st.session_state and st.session_state.last_result:
